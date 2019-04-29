@@ -1,1 +1,10 @@
+# Common build folder locations
 build
+cmake-build-debug
+cmake-build-release
+
+#Python virtual environment
+env
+
+# IDE files
+.idea
