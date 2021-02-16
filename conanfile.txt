@@ -1,0 +1,9 @@
+[requires]
+charls/2.1.0
+pybind11/2.6.2
+
+[generators]
+cmake_find_package
+
+[options]
+charls:shared=False
