@@ -9,9 +9,5 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 find_package(pybind11 REQUIRED)
 find_package(charls REQUIRED)
 
-enable_testing()
-
 add_subdirectory(src)
-add_subdirectory(app)
-add_subdirectory(test)
 
