@@ -1,8 +1,15 @@
 cmake_minimum_required(VERSION 3.18.2)
 
-project(Pycharls CXX)
+project(Pycharls VERSION 0.0.1)
 set(PYCHARLS_CONAN_COMMAND conan CACHE STRING "conan command")
 set(PYBIND11_FINDPYTHON ON)
+
+if(SKBUILD)
+    set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
+    set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
+    set(Python_LIBRARY "${PYTHON_LIBRARY}")
+    set(DUMMY "${PYTHON_VERSION_STRING}")  # Not needed, silences a warning
+endif()
 
 if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
     message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
