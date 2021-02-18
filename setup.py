@@ -16,7 +16,9 @@ setup(
     version="0.0.1",
     description="A JPEG-LS plugin for the Pillow imaging library",
     author="Andrew Marshall",
-    license="MIT",
+    license="Apache-2.0",
     packages=find_packages(),
-    cmake_install_dir="src/"
+    install_requires=[
+        "Pillow"
+    ]
 )
