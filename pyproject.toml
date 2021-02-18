@@ -4,6 +4,8 @@ requires = [
     "wheel",
     "pybind11~=2.6.0",
     "cmake",
+    "conan",
+    "ninja",
     "scikit-build",
 ]
 
