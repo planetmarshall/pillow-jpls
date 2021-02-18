@@ -23,8 +23,8 @@ jobs:
         uses: joerick/cibuildwheel@v1.9.0
         env:
            CIBW_SKIP: cp27-* cp35-*
-           CIBW_TEST_REQUIRED: pytest
-           CIBW_TEST_COMMAND: pytest -v test
+           CIBW_TEST_REQUIRES: pytest
+           CIBW_TEST_COMMAND: pytest -v {project}/test
 
       - uses: actions/upload-artifact@v2
         with:
