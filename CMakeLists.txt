@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.18.2)
 
 project(Pycharls VERSION 0.0.1)
 set(PYCHARLS_CONAN_COMMAND conan CACHE STRING "conan command")
-set(PYBIND11_FINDPYTHON ON)
 
 if(SKBUILD)
     set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
@@ -26,6 +25,7 @@ conan_cmake_run(
 )
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED)
 find_package(charls REQUIRED)
 
