@@ -8,6 +8,7 @@ if(SKBUILD)
     set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
     set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
     set(DUMMY "${PYTHON_VERSION_STRING}")  # Not needed, silences a warning
+    find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
     execute_process(
             COMMAND
@@ -34,6 +35,7 @@ else()
     conan_basic_setup()
 endif()
 
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED)
 find_package(charls REQUIRED)
 
