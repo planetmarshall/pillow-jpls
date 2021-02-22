@@ -16,7 +16,7 @@ setup(
     version="0.0.1",
     description="A JPEG-LS plugin for the Pillow imaging library",
     author="Andrew Marshall",
-    license="Apache-2.0",
+    license="BSD-3-Clause",
     packages=find_packages(),
     install_requires=[
         "Pillow"
