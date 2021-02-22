@@ -14,10 +14,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, windows-2019, macos-10.15 ]
+        os: [ ubuntu-20.04, windows-2019 ]
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          lfs: true
 
       - name: Build wheels
         uses: joerick/cibuildwheel@v1.9.0
