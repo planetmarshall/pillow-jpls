@@ -8,5 +8,5 @@ target_link_libraries( _pycharls
         )
 
 install(TARGETS _pycharls
-        DESTINATION .
+        LIBRARY DESTINATION .
         )

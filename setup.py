@@ -18,6 +18,7 @@ setup(
     author="Andrew Marshall",
     license="BSD-3-Clause",
     packages=find_packages(),
+    cmake_install_dir="pillow_jpls",
     install_requires=[
         "Pillow"
     ]
