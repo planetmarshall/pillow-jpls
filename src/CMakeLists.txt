@@ -1,5 +1,11 @@
-pybind11_add_module(pycharls MODULE pycharls.cpp)
+pybind11_add_module(_pycharls MODULE pycharls.cpp)
 
-install(TARGETS pycharls
-        LIBRARY DESTINATION lib
+target_link_libraries( _pycharls
+    PRIVATE
+        Python3::Module
+        charls::charls
+        )
+
+install(TARGETS _pycharls
+        DESTINATION .
         )

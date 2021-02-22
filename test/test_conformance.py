@@ -8,6 +8,8 @@ import pytest
 import pillow_jpls # noqa # pylint: disable=unused-import
 
 # Conformance tests from Annexe E of the `ITU Spec <https://www.itu.int/rec/T-REC-T.87/en>`_.
+
+# We don't support
 # Tests 7 and 8 are omitted as subsampling is not supported by CharLS (and is rarely used)
 
 
