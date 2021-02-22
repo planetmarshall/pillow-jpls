@@ -5,6 +5,7 @@ project(Pycharls VERSION 0.0.1)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 if(SKBUILD)
     set(PYCHARLS_CONAN_COMMAND conan CACHE STRING "conan command")
+    set(Python_LIBRARY "${PYTHON_LIBRARY}")
     set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
     set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
     set(DUMMY "${PYTHON_VERSION_STRING}")  # Not needed, silences a warning
@@ -31,11 +32,11 @@ if(SKBUILD)
             BUILD missing
     )
 else()
+    find_package(Python REQUIRED COMPONENTS Development)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
 endif()
 
-find_package(Python REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED)
 find_package(charls REQUIRED)
 
