@@ -59,21 +59,21 @@ def test_03_compress_lossless_sample_interleave():
 
 
 def test_04_compress_lossy_no_interleave():
-    encoded_data = _encode_to_bytes("TEST8.png", near=3, interleave="none")
+    encoded_data = _encode_to_bytes("TEST8.png", near_lossless=3, interleave="none")
     expected_data = _load_encoded_data("T8C0E3.JLS")
 
     assert _hash(expected_data) == _hash(encoded_data)
 
 
 def test_05_compress_lossy_line_interleave():
-    encoded_data = _encode_to_bytes("TEST8.png", near=3, interleave="line")
+    encoded_data = _encode_to_bytes("TEST8.png", near_lossless=3, interleave="line")
     expected_data = _load_encoded_data("T8C1E3.JLS")
 
     assert _hash(expected_data) == _hash(encoded_data)
 
 
 def test_06_compress_lossy_sample_interleave():
-    encoded_data = _encode_to_bytes("TEST8.png", near=3)
+    encoded_data = _encode_to_bytes("TEST8.png", near_lossless=3)
     expected_data = _load_encoded_data("T8C2E3.JLS")
 
     assert _hash(expected_data) == _hash(encoded_data)
@@ -87,7 +87,7 @@ def test_09_compress_lossless_custom_threshold():
 
 
 def test_10_compress_lossy_custom_threshold():
-    encoded_data = _encode_to_bytes("TEST8BS2.png", near=3, t1=9, t2=9, t3=9, reset=31)
+    encoded_data = _encode_to_bytes("TEST8BS2.png", near_lossless=3, t1=9, t2=9, t3=9, reset=31)
     expected_data = _load_encoded_data("T8NDE3.JLS")
 
     assert _hash(expected_data) == _hash(encoded_data)
@@ -101,7 +101,7 @@ def test_11_compress_lossless_16():
 
 
 def test_12_compress_lossless_16():
-    encoded_data = _encode_to_bytes("TEST16.png", near=3)
+    encoded_data = _encode_to_bytes("TEST16.png", near_lossless=3)
     expected_data = _load_encoded_data("T16E3.JLS")
 
     assert _hash(expected_data) == _hash(encoded_data)

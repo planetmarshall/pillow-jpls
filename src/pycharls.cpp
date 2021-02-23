@@ -7,7 +7,16 @@
 
 namespace py = pybind11;
 
-charls::interleave_mode get_interleave_mode(const py::dict & kwargs) {
+template<typename T>
+T value_or(const py::dict & kwargs, const char * key, const T & default_value) {
+    if (kwargs.template contains(key)) {
+        return kwargs[key].cast<T>();
+    }
+
+    return default_value;
+}
+
+charls::interleave_mode interleave_mode(const py::dict & kwargs) {
     if (!kwargs.contains("interleave")) {
         return charls::interleave_mode::sample;
     }
@@ -25,12 +34,15 @@ charls::interleave_mode get_interleave_mode(const py::dict & kwargs) {
     throw std::runtime_error(fmt::format(FMT_STRING("interleave mode '{}' not recognized"), mode));
 }
 
-int get_near_value(const py::dict & kwargs) {
-    if (!kwargs.contains("near")) {
-        return 0;
-    }
+charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs) {
+    charls::jpegls_pc_parameters params;
+    params.maximum_sample_value = value_or<int32_t>(kwargs, "maxval", 0);
+    params.threshold1 = value_or<int32_t>(kwargs, "t1", 0);
+    params.threshold2 = value_or<int32_t>(kwargs, "t2", 0);
+    params.threshold3 = value_or<int32_t>(kwargs, "t3", 0);
+    params.reset_value = value_or<int32_t>(kwargs, "reset", 0);
 
-    return kwargs["near"].cast<int>();
+    return params;
 }
 
 std::vector<uint8_t> interleaved_to_planar(const uint8_t *pBegin, const charls::frame_info &frame_info) {
@@ -60,15 +72,18 @@ PYBIND11_MODULE(_pycharls, module) {
         "encode",
         [](const py::buffer &src_buffer, const charls::frame_info &frame_info, const py::dict &kwargs) {
             charls::jpegls_encoder encoder;
+
             encoder.frame_info(frame_info);
-            auto interleave_mode = get_interleave_mode(kwargs);
-            encoder.near_lossless(get_near_value(kwargs));
+            auto ilv = interleave_mode(kwargs);
+            encoder.interleave_mode(ilv);
+            encoder.near_lossless(value_or<int32_t>(kwargs, "near_lossless", 0));
+            encoder.preset_coding_parameters(preset_coding_parameters(kwargs));
 
             std::vector<uint8_t> dest(encoder.estimated_destination_size());
             encoder.destination(dest);
 
             auto src_buffer_info = src_buffer.request();
-            if (interleave_mode == charls::interleave_mode::none) {
+            if (ilv == charls::interleave_mode::none) {
                 std::vector<uint8_t> src =
                     interleaved_to_planar(static_cast<const uint8_t *>(src_buffer_info.ptr), frame_info);
                 const auto bytes_encoded = encoder.encode(src);
