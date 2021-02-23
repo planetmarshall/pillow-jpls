@@ -9,12 +9,7 @@ if(SKBUILD)
     set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
     set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
     set(DUMMY "${PYTHON_VERSION_STRING}")  # Not needed, silences a warning
-    find_package(Python COMPONENTS Development)
-    # Only Development.Module is actually requried, but this can fail if we just search for that
-    # TODO (andrew) try to reproduce this and log a bug with CMake
-    if(NOT Python_Development.Module_FOUND)
-        message(FATAL "Development artifacts for Python Modules were not found")
-    endif()
+    find_package(Python REQUIRED COMPONENTS Development.Module)
 
     execute_process(
             COMMAND
@@ -37,7 +32,7 @@ if(SKBUILD)
             BUILD outdated
     )
 else()
-    find_package(Python REQUIRED COMPONENTS Development)
+    find_package(Python REQUIRED COMPONENTS Development.Module)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
 endif()
