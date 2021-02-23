@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18)
 
 project(Pycharls VERSION 0.0.1)
 
@@ -9,7 +9,12 @@ if(SKBUILD)
     set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
     set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
     set(DUMMY "${PYTHON_VERSION_STRING}")  # Not needed, silences a warning
-    find_package(Python REQUIRED COMPONENTS Development.Module)
+    find_package(Python COMPONENTS Development)
+    # Only Development.Module is actually requried, but this can fail if we just search for that
+    # TODO (andrew) try to reproduce this and log a bug with CMake
+    if(NOT Python_Development.Module_FOUND)
+        message(FATAL "Development artifacts for Python Modules were not found")
+    endif()
 
     execute_process(
             COMMAND
@@ -29,7 +34,7 @@ if(SKBUILD)
             BASIC_SETUP
             PROFILE_AUTO
             CONAN_COMMAND ${PYCHARLS_CONAN_COMMAND}
-            BUILD missing
+            BUILD outdated
     )
 else()
     find_package(Python REQUIRED COMPONENTS Development)
@@ -39,6 +44,8 @@ endif()
 
 find_package(pybind11 REQUIRED)
 find_package(charls REQUIRED)
+find_package(frozen REQUIRED)
+find_package(fmt REQUIRED)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
 add_subdirectory(src)

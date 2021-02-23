@@ -38,7 +38,7 @@ def _hash(data):
 
 
 def test_01_compress_lossless_no_interleave():
-    encoded_data = _encode_to_bytes("TEST8.png")
+    encoded_data = _encode_to_bytes("TEST8.png", interleave="none")
     expected_data = _load_encoded_data("T8C0E0.JLS")
 
     assert _hash(expected_data) == _hash(encoded_data)
