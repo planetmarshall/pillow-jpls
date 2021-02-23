@@ -52,10 +52,7 @@ jobs:
 
       - name: Build wheel
         run: |
-          pwd
-          echo ${GITHUB_WORKSPACE}
-          ls
-          python -m pep517.build . --binary --out-dir wheelhouse
+          python -m pep517.build ${GITHUB_WORKSPACE} --binary --out-dir wheelhouse
 
       - uses: actions/upload-artifact@v2
         with:

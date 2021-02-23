@@ -39,7 +39,6 @@ endif()
 
 find_package(pybind11 REQUIRED)
 find_package(charls REQUIRED)
-find_package(frozen REQUIRED)
 find_package(fmt REQUIRED)
 
 add_compile_options(-Wall -Wextra -Wpedantic)
