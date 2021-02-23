@@ -34,13 +34,62 @@ charls::interleave_mode interleave_mode(const py::dict & kwargs) {
     throw std::runtime_error(fmt::format(FMT_STRING("interleave mode '{}' not recognized"), mode));
 }
 
-charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs) {
-    charls::jpegls_pc_parameters params;
-    params.maximum_sample_value = value_or<int32_t>(kwargs, "maxval", 0);
-    params.threshold1 = value_or<int32_t>(kwargs, "t1", 0);
-    params.threshold2 = value_or<int32_t>(kwargs, "t2", 0);
-    params.threshold3 = value_or<int32_t>(kwargs, "t3", 0);
-    params.reset_value = value_or<int32_t>(kwargs, "reset", 0);
+constexpr int32_t clamp(int32_t i, int32_t j, int32_t maxval) {
+    if (i > maxval) {
+        return j;
+    }
+    if (i < j) {
+        return j;
+    }
+    return i;
+}
+
+charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs, int32_t bits_per_sample, int32_t near) {
+    // Defaults have to be set for all the parameters, or they all need to be set to zero
+    // so we handle missing defaults here - see https://github.com/team-charls/charls/issues/84
+    charls::jpegls_pc_parameters params{0, 0, 0, 0, 0};
+    const std::vector<std::string> keys{ "maxval", "t1", "t2", "t3", "reset" };
+    auto iter = std::find_first_of(
+        kwargs.begin(),
+        kwargs.end(),
+        keys.begin(),
+        keys.end(),
+        []( const auto & param, const auto & key) {
+            return key == std::string(py::str(param.first));
+        });
+
+    if (iter == kwargs.end()) {
+        return params;
+    }
+
+    params.maximum_sample_value = value_or<int32_t>(kwargs, "maxval", std::pow(2, bits_per_sample) - 1);
+    params.reset_value = value_or<int32_t>(kwargs, "reset", 64);
+
+    const int32_t basic_t1 = 3;
+    const int32_t basic_t2 = 7;
+    const int32_t basic_t3 = 21;
+
+    if (params.maximum_sample_value == 255 && near == 0) {
+        params.threshold1 = value_or<int32_t>(kwargs, "t1", basic_t1);
+        params.threshold2 = value_or<int32_t>(kwargs, "t2", basic_t2);
+        params.threshold3 = value_or<int32_t>(kwargs, "t3", basic_t3);
+
+        return params;
+    }
+
+    if (params.maximum_sample_value >= 128) {
+        int32_t factor = (std::min(params.maximum_sample_value, 4095) + 128) / 256;
+        params.threshold1 = value_or<int32_t>(kwargs, "t1", clamp(factor * (basic_t1 - 2) + 2 + 3 * near, near + 1, params.maximum_sample_value));
+        params.threshold2 = value_or<int32_t>(kwargs, "t2", clamp(factor * (basic_t2 - 3) + 3 + 5 * near, params.threshold1, params.maximum_sample_value));
+        params.threshold3 = value_or<int32_t>(kwargs, "t3", clamp(factor * (basic_t3 - 4) + 4 + 7 * near, params.threshold2, params.maximum_sample_value));
+
+        return params;
+    }
+
+    int32_t factor = 256 / (params.maximum_sample_value + 1);
+    params.threshold1 = value_or<int32_t>(kwargs, "t1", clamp(std::max(2, basic_t1 / factor + 3 * near), near + 1, params.maximum_sample_value));
+    params.threshold2 = value_or<int32_t>(kwargs, "t2", clamp(std::max(3, basic_t2 / factor + 5 * near), params.threshold1, params.maximum_sample_value));
+    params.threshold3 = value_or<int32_t>(kwargs, "t3", clamp(std::max(4, basic_t3 / factor + 7 * near), params.threshold2, params.maximum_sample_value));
 
     return params;
 }
@@ -50,7 +99,7 @@ std::vector<uint8_t> interleaved_to_planar(const uint8_t *pBegin, const charls::
     uint32_t bytes_per_sample = (frame_info.bits_per_sample + 7) / 8;
     std::vector<uint8_t> dest_buffer(frame_info.component_count * samples_per_component * bytes_per_sample);
 
-    for (size_t j = 0; j < frame_info.component_count; ++j) {
+    for (size_t j = 0; j < static_cast<size_t>(frame_info.component_count); ++j) {
         size_t component_offset = j * samples_per_component;
         for (size_t i = 0; i < samples_per_component; ++i) {
             dest_buffer[component_offset + i] = pBegin[i * frame_info.component_count + j];
@@ -74,16 +123,17 @@ PYBIND11_MODULE(_pycharls, module) {
             charls::jpegls_encoder encoder;
 
             encoder.frame_info(frame_info);
-            auto ilv = interleave_mode(kwargs);
+            auto ilv = frame_info.component_count == 1 ? charls::interleave_mode::none : interleave_mode(kwargs);
             encoder.interleave_mode(ilv);
-            encoder.near_lossless(value_or<int32_t>(kwargs, "near_lossless", 0));
-            encoder.preset_coding_parameters(preset_coding_parameters(kwargs));
+            auto near = value_or<int32_t>(kwargs, "near_lossless", 0);
+            encoder.near_lossless(near);
+            encoder.preset_coding_parameters(preset_coding_parameters(kwargs, frame_info.bits_per_sample, near));
 
-            std::vector<uint8_t> dest(encoder.estimated_destination_size());
+            std::vector<uint8_t> dest(encoder.estimated_destination_size() * 2);
             encoder.destination(dest);
 
             auto src_buffer_info = src_buffer.request();
-            if (ilv == charls::interleave_mode::none) {
+            if (ilv == charls::interleave_mode::none && frame_info.component_count > 1) {
                 std::vector<uint8_t> src =
                     interleaved_to_planar(static_cast<const uint8_t *>(src_buffer_info.ptr), frame_info);
                 const auto bytes_encoded = encoder.encode(src);

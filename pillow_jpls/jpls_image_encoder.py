@@ -3,7 +3,8 @@ from PIL import Image
 from . import _pycharls
 
 _mode_table = {
-    'RGB': (8, 3)
+    'RGB': (8, 3),
+    'L': (8, 1)
 }
 
 
