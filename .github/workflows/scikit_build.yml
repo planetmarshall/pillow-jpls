@@ -17,7 +17,8 @@ jobs:
         os: [ ubuntu-20.04, windows-2019 ]
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
         with:
           lfs: true
 
@@ -28,7 +29,8 @@ jobs:
            CIBW_TEST_REQUIRES: pytest
            CIBW_TEST_COMMAND: pytest -v {project}/test
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload wheel files
+        uses: actions/upload-artifact@v2
         with:
             path: ./wheelhouse/*.whl
 
@@ -40,6 +42,11 @@ jobs:
         python-version: [ 3.6, 3.7, 3.8, 3.9 ]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -52,8 +59,9 @@ jobs:
 
       - name: Build wheel
         run: |
-          python -m pep517.build ${GITHUB_WORKSPACE} --binary --out-dir wheelhouse
+          python -m pep517.build . --binary --out-dir wheelhouse
 
-      - uses: actions/upload-artifact@v2
+      - name: Upload wheel files
+        uses: actions/upload-artifact@v2
         with:
           path: ./wheelhouse/*.whl
