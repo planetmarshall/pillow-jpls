@@ -17,15 +17,22 @@ def _file_path(file_name):
     return os.path.realpath(os.path.join(os.path.dirname(__file__), "data", file_name))
 
 
-def _encode_to_bytes(file_name, **kwargs):
+def _encode_to_bytes(file_name, mode=None, **kwargs):
     src = Image.open(_file_path(file_name))
+    if mode is not None:
+        src = src.convert(mode)
+
     buffer = BytesIO()
     src.save(buffer, format="JPEG-LS", **kwargs)
     return buffer.getvalue()
 
 
-def _decode_to_bytes(file_name):
-    return Image.open(_file_path(file_name)).tobytes()
+def _decode_to_bytes(file_name, mode=None):
+    image = Image.open(_file_path(file_name))
+    if mode is not None:
+        image = image.convert(mode)
+
+    return image
 
 
 def _load_encoded_data(file_name):
@@ -94,14 +101,14 @@ def test_10_compress_lossy_custom_threshold():
 
 
 def test_11_compress_lossless_16():
-    encoded_data = _encode_to_bytes("TEST16.png")
+    encoded_data = _encode_to_bytes("TEST16.png", mode="I;16", bits_per_sample=12)
     expected_data = _load_encoded_data("T16E0.JLS")
 
     assert _hash(expected_data) == _hash(encoded_data)
 
 
-def test_12_compress_lossless_16():
-    encoded_data = _encode_to_bytes("TEST16.png", near_lossless=3)
+def test_12_compress_lossy_16():
+    encoded_data = _encode_to_bytes("TEST16.png", mode="I;16", near_lossless=3, bits_per_sample=12)
     expected_data = _load_encoded_data("T16E3.JLS")
 
     assert _hash(expected_data) == _hash(encoded_data)
@@ -121,5 +128,7 @@ def test_12_compress_lossless_16():
 def test_decompress(encoded, decoded):
     jls_decoded = _decode_to_bytes(encoded)
     raw_decoded = _decode_to_bytes(decoded)
+    if raw_decoded.mode == "I":
+        raw_decoded = raw_decoded.convert("I;16")
 
     assert _hash(raw_decoded) == _hash(jls_decoded)

@@ -9,3 +9,4 @@ Image.register_extensions(JplsImageFile.format, ["jls", "jpls"])
 Image.register_save(JplsImageFile.format, save)
 Image.register_decoder("jpeg_ls", JplsImageDecoder)
 Image.register_mime(JplsImageFile.format, "image/jls")
+

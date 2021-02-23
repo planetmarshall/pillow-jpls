@@ -58,7 +58,7 @@ charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs, i
             return key == std::string(py::str(param.first));
         });
 
-    if (iter == kwargs.end()) {
+    if (iter == kwargs.end() && bits_per_sample <= 12) {
         return params;
     }
 
