@@ -41,6 +41,11 @@ find_package(charls REQUIRED)
 find_package(fmt REQUIRED)
 find_package(Eigen3 REQUIRED)
 
-add_compile_options(-Wall -Wextra -Wpedantic)
+if (MSVC)
+    add_compile_options(/Wall /permissive-)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
 add_subdirectory(src)
 
