@@ -5,11 +5,10 @@ project(Pycharls VERSION 0.0.1)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 if(SKBUILD)
     set(PYCHARLS_CONAN_COMMAND conan CACHE STRING "conan command")
-    set(Python_LIBRARY "${PYTHON_LIBRARY}")
     set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
     set(Python_INCLUDE_DIR "${PYTHON_INCLUDE_DIR}")
     set(DUMMY "${PYTHON_VERSION_STRING}")  # Not needed, silences a warning
-    find_package(Python REQUIRED COMPONENTS Development.Module)
+    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 
     execute_process(
             COMMAND
@@ -32,7 +31,7 @@ if(SKBUILD)
             BUILD outdated
     )
 else()
-    find_package(Python REQUIRED COMPONENTS Development.Module)
+    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
 endif()
