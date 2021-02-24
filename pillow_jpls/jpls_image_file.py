@@ -27,7 +27,7 @@ class JplsImageFile(ImageFile):
     format_description = "Lossless and near-lossless compression of continuous-tone still images"
 
     def _open(self):
-        max_header_bytes = 32
+        max_header_bytes = 128
         buffer = self.fp.read(max_header_bytes)
         header = _pycharls.read_header(buffer)
         mode = _mode(header["component_count"], header["bits_per_sample"])
@@ -38,5 +38,5 @@ class JplsImageFile(ImageFile):
         self.info.update(header)
         self._size = (header["width"], header["height"])
         self.mode = mode
-        self.tile = [ ("jpeg_ls", (0, 0) + self.size, 0, (self.mode, 0)) ]
+        self.tile = [("jpeg_ls", (0, 0) + self.size, 0, (self.mode, 0))]
 

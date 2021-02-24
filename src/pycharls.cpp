@@ -8,6 +8,35 @@
 namespace py = pybind11;
 using namespace py::literals;
 
+namespace pybind11 {
+
+// Bytes object that supports resizing and the buffer protocol
+class bytes_ : public buffer {
+  public:
+  PYBIND11_OBJECT_CVT(bytes_, buffer, PyBytes_Check, PyBytes_FromObject)
+
+    bytes_(const char *c, size_t n)
+        : buffer(PyBytes_FromStringAndSize(c, (ssize_t) n), stolen_t{}) {
+        if (!m_ptr) pybind11_fail("Could not allocate bytes object!");
+    }
+
+    bytes_()
+        : bytes_("", 0) {
+    }
+
+    void resize(size_t len) { _PyBytes_Resize(&m_ptr, len); }
+
+    size_t size() const { return static_cast<size_t>(PyByteArray_Size(m_ptr)); }
+
+    explicit operator std::string() const {
+        char *buffer = PyByteArray_AS_STRING(m_ptr);
+        ssize_t size = PyByteArray_GET_SIZE(m_ptr);
+        return std::string(buffer, static_cast<size_t>(size));
+    }
+};
+}
+
+
 template<typename T>
 T value_or(const py::dict & kwargs, const char * key, const T & default_value) {
     if (kwargs.template contains(key)) {
@@ -180,4 +209,21 @@ PYBIND11_MODULE(_pycharls, module) {
             );
         },
         "Read header info from a JPEG-LS stream");
+
+    module.def("decode", [] (const py::buffer & src_buffer) {
+        charls::jpegls_decoder decoder;
+        auto src_buffer_info = src_buffer.request();
+        decoder.source(src_buffer_info.ptr, src_buffer_info.size);
+        decoder.read_header();
+        auto interleave_mode = decoder.interleave_mode();
+        auto params = decoder.preset_coding_parameters();
+
+        py::bytes_ destination_buffer;
+        destination_buffer.resize(decoder.destination_size());
+        auto dest_buffer_info = destination_buffer.request();
+        decoder.decode(dest_buffer_info.ptr, dest_buffer_info.size);
+
+        return destination_buffer;
+    }, "Decode a JPEG-LS stream");
+
 }
