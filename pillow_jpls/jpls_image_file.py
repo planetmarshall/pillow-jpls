@@ -10,5 +10,6 @@ def accept(header):
 
 class JplsImageFile(ImageFile):
     format = "JPEG-LS"
+
     def _open(self):
         pass

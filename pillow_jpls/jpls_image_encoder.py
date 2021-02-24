@@ -15,7 +15,8 @@ def modes_to_str():
 
 def save(image: Image, fp, file_name):
     if image.mode not in _mode_table:
-        raise SyntaxError(f"Image mode {image.mode} not supported. Convert to one of the supported modes: {modes_to_str()}.")
+        raise SyntaxError(
+            f"Image mode {image.mode} not supported. Convert to one of the supported modes: {modes_to_str()}.")
 
     bits_per_sample, component_count = _mode_table[image.mode]
     frame_info = _pycharls.FrameInfo()
@@ -25,4 +26,3 @@ def save(image: Image, fp, file_name):
     frame_info.bits_per_sample = image.encoderinfo.get("bits_per_sample", bits_per_sample)
     encoded_bytes = _pycharls.encode(image.tobytes(), frame_info, image.encoderinfo)
     fp.write(bytes(encoded_bytes))
-
