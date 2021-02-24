@@ -7,6 +7,7 @@ target_link_libraries( _pycharls
         Python::Module
         pybind11::headers
         charls::charls
+        Eigen3::Eigen3
         fmt::fmt
         )
 

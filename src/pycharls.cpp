@@ -2,11 +2,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <fmt/format.h>
+#include <Eigen/Core>
 
 #include <vector>
 
 namespace py = pybind11;
 using namespace py::literals;
+using Mx = Eigen::Array<uint8_t, Eigen::Dynamic, Eigen::Dynamic>;
+using Map = Eigen::Map<Mx>;
 
 namespace pybind11 {
 
@@ -35,7 +38,6 @@ class bytes_ : public buffer {
     }
 };
 }
-
 
 template<typename T>
 T value_or(const py::dict & kwargs, const char * key, const T & default_value) {
@@ -215,14 +217,26 @@ PYBIND11_MODULE(_pycharls, module) {
         auto src_buffer_info = src_buffer.request();
         decoder.source(src_buffer_info.ptr, src_buffer_info.size);
         decoder.read_header();
+        auto frame_info = decoder.frame_info();
         auto interleave_mode = decoder.interleave_mode();
         auto params = decoder.preset_coding_parameters();
 
         py::bytes_ destination_buffer;
         destination_buffer.resize(decoder.destination_size());
         auto dest_buffer_info = destination_buffer.request();
-        decoder.decode(dest_buffer_info.ptr, dest_buffer_info.size);
 
+      if (interleave_mode == charls::interleave_mode::none && frame_info.component_count > 1) {
+            std::vector<uint8_t> planar_buffer(decoder.destination_size());
+            decoder.decode(planar_buffer);
+            size_t elements_per_component = frame_info.width * frame_info.height;
+            Map dest_view(static_cast<uint8_t *>(dest_buffer_info.ptr), frame_info.component_count, elements_per_component);
+            Map src_view(planar_buffer.data(), elements_per_component, frame_info.component_count);
+
+            dest_view = src_view.transpose();
+            return destination_buffer;
+        }
+
+        decoder.decode(dest_buffer_info.ptr, dest_buffer_info.size);
         return destination_buffer;
     }, "Decode a JPEG-LS stream");
 
