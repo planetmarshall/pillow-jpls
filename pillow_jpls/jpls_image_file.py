@@ -39,4 +39,3 @@ class JplsImageFile(ImageFile):
         self._size = (header["width"], header["height"])
         self.mode = mode
         self.tile = [("jpeg_ls", (0, 0) + self.size, 0, (self.mode, 0))]
-
