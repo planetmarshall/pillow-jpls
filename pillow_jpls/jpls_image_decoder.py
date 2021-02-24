@@ -15,7 +15,7 @@ class JplsImageDecoder(PyDecoder):
         errcode = 0
         try:
             decoded = _pycharls.decode(buffer)
-            self.set_as_raw(decoded)
+            self.set_as_raw(bytes(decoded))
         except RuntimeError:
             errcode = -2
 

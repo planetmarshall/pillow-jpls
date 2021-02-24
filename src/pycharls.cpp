@@ -221,22 +221,21 @@ PYBIND11_MODULE(_pycharls, module) {
         auto interleave_mode = decoder.interleave_mode();
         auto params = decoder.preset_coding_parameters();
 
-        py::bytes_ destination_buffer;
+        std::vector<uint8_t> destination_buffer;
         destination_buffer.resize(decoder.destination_size());
-        auto dest_buffer_info = destination_buffer.request();
 
       if (interleave_mode == charls::interleave_mode::none && frame_info.component_count > 1) {
             std::vector<uint8_t> planar_buffer(decoder.destination_size());
             decoder.decode(planar_buffer);
             size_t elements_per_component = frame_info.width * frame_info.height;
-            Map dest_view(static_cast<uint8_t *>(dest_buffer_info.ptr), frame_info.component_count, elements_per_component);
+            Map dest_view(static_cast<uint8_t *>(destination_buffer.data()), frame_info.component_count, elements_per_component);
             Map src_view(planar_buffer.data(), elements_per_component, frame_info.component_count);
 
             dest_view = src_view.transpose();
             return destination_buffer;
         }
 
-        decoder.decode(dest_buffer_info.ptr, dest_buffer_info.size);
+        decoder.decode(destination_buffer);
         return destination_buffer;
     }, "Decode a JPEG-LS stream");
 
