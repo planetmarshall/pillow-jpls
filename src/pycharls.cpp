@@ -41,7 +41,7 @@ class bytes_ : public buffer {
 
 template<typename T>
 T value_or(const py::dict & kwargs, const char * key, const T & default_value) {
-    if (kwargs.template contains(key)) {
+    if (kwargs.contains(key)) {
         return kwargs[key].cast<T>();
     }
 
