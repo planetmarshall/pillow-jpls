@@ -1,11 +1,12 @@
 #include <charls/charls.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-
 #include <fmt/format.h>
+
 #include <vector>
 
 namespace py = pybind11;
+using namespace py::literals;
 
 template<typename T>
 T value_or(const py::dict & kwargs, const char * key, const T & default_value) {
@@ -146,4 +147,37 @@ PYBIND11_MODULE(_pycharls, module) {
             return dest;
         },
         "encode a buffer to JPEG-LS");
+
+    module.def("read_header",
+        [](const py::buffer & src_buffer) {
+            charls::jpegls_decoder decoder;
+            auto src_buffer_info = src_buffer.request();
+            decoder.source(src_buffer_info.ptr, src_buffer_info.size);
+            bool spiff_header_present{};
+            auto header = decoder.read_spiff_header(spiff_header_present);
+            if (!spiff_header_present) {
+                decoder.read_header();
+                auto frame_info = decoder.frame_info();
+                return py::dict(
+                    "component_count"_a=frame_info.component_count,
+                    "height"_a=frame_info.height,
+                    "width"_a=frame_info.width,
+                    "bits_per_sample"_a=frame_info.bits_per_sample
+                );
+            }
+
+            return py::dict(
+                "profile_id"_a=static_cast<int32_t>(header.profile_id),
+                "component_count"_a=header.component_count,
+                "height"_a=header.height,
+                "width"_a=header.width,
+                "color_space"_a=static_cast<int32_t>(header.color_space),
+                "bits_per_sample"_a=header.bits_per_sample,
+                "compression_type"_a=static_cast<int32_t>(header.compression_type),
+                "resolution_units"_a=static_cast<int32_t>(header.resolution_units),
+                "vertical_resolution"_a=header.vertical_resolution,
+                "horizontal_resolution"_a=header.horizontal_resolution
+            );
+        },
+        "Read header info from a JPEG-LS stream");
 }

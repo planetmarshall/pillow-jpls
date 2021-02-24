@@ -2,10 +2,11 @@ from PIL import Image
 
 from . import _pycharls
 
+
 _mode_table = {
-    'RGB': (8, 3),
-    'L': (8, 1),
-    'I;16': (16, 1)
+    'RGB': (3, 8),
+    'L': (1, 8),
+    'I;16': (1, 16)
 }
 
 
@@ -18,7 +19,7 @@ def save(image: Image, fp, file_name):
         raise SyntaxError(
             f"Image mode {image.mode} not supported. Convert to one of the supported modes: {modes_to_str()}.")
 
-    bits_per_sample, component_count = _mode_table[image.mode]
+    component_count, bits_per_sample = _mode_table[image.mode]
     frame_info = _pycharls.FrameInfo()
     frame_info.width = image.width
     frame_info.height = image.height

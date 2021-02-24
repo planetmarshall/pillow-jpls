@@ -129,4 +129,4 @@ def test_decompress(encoded, decoded):
     if raw_decoded.mode == "I":
         raw_decoded = raw_decoded.convert("I;16")
 
-    assert _hash(raw_decoded) == _hash(jls_decoded)
+    assert _hash(raw_decoded.tobytes()) == _hash(jls_decoded.tobytes())
