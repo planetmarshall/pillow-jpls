@@ -37,7 +37,7 @@ jobs:
         uses: joerick/cibuildwheel@v1.9.0
         env:
            CIBW_SKIP: cp27-* cp35-*
-           CIBW_TEST_REQUIRES: pytest
+           CIBW_TEST_REQUIRES: pytest numpy
            CIBW_TEST_COMMAND: pytest -v {project}/test
 
       - name: Upload wheel files
