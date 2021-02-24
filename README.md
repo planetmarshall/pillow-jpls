@@ -30,20 +30,6 @@ buffer = BytesIO()
 img.save(buffer, "JPEG-LS")
 ```
 
-### With scikit-image
-
-[scikit-image](https://scikit-image.org/) uses PIL as one of its backends, so usage is transparent
-
-```.py
-import pillow_jpls
-import skimage
-import numpy as np
-
-img = skimage.imread("mandrill.jls")
-data = (np.random.rand(4, 3) * 4095).astype(np.uint16)
-skimage.imsave("random.jls", plugin="pil", plugin_args={"bits_per_component": 12})
-```
-
 ### Options
 
 The encoder supports the following options. See the specification for details, and the tests for 
