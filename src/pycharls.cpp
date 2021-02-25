@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 
 #include <vector>
+#include <variant>
 
 namespace py = pybind11;
 using namespace py::literals;
@@ -38,8 +39,6 @@ class bytes_ : public buffer {
     }
 };
 }
-
-
 
 template<typename T>
 T value_or(const py::dict & kwargs, const char * key, const T & default_value) {
@@ -152,7 +151,7 @@ PYBIND11_MODULE(_pycharls, module) {
         .def_readwrite("component_count", &charls::frame_info::component_count);
 
     py::enum_<charls::spiff_profile_id>(module, "SpiffProfileId")
-        .value("None", charls::spiff_profile_id::none)
+        .value("NotSpecified", charls::spiff_profile_id::none)
         .value("BiLevelFacsimile", charls::spiff_profile_id::bi_level_facsimile)
         .value("ContinuousToneBase", charls::spiff_profile_id::continuous_tone_base)
         .value("ContinuousToneFacsimile", charls::spiff_profile_id::continuous_tone_facsimile)
@@ -160,7 +159,7 @@ PYBIND11_MODULE(_pycharls, module) {
         .export_values();
 
     py::enum_<charls::spiff_color_space>(module, "SpiffColorSpace")
-        .value("None", charls::spiff_color_space::none)
+        .value("NotSpecified", charls::spiff_color_space::none)
         .value("BiLevelBlack", charls::spiff_color_space::bi_level_black)
         .value("BiLevelWhite", charls::spiff_color_space::bi_level_white)
         .value("CieLab", charls::spiff_color_space::cie_lab)
@@ -187,13 +186,26 @@ PYBIND11_MODULE(_pycharls, module) {
 
     py::enum_<charls::spiff_resolution_units>(module, "SpiffResolutionUnits")
         .value("AspectRatio", charls::spiff_resolution_units::aspect_ratio)
-        .value("BiLevelBlack", charls::spiff_resolution_units::dots_per_inch)
-        .value("BiLevelWhite", charls::spiff_resolution_units::dots_per_centimeter)
+        .value("DotsPerInch", charls::spiff_resolution_units::dots_per_inch)
+        .value("DotsPerCentimeter", charls::spiff_resolution_units::dots_per_centimeter)
         .export_values();
+
+    py::class_<charls::spiff_header>(module, "SpiffHeader", py::dynamic_attr())
+        .def(py::init())
+        .def_readwrite("horizontal_resolution", &charls::spiff_header::horizontal_resolution)
+        .def_readwrite("vertical_resolution", &charls::spiff_header::vertical_resolution)
+        .def_readwrite("resolution_units", &charls::spiff_header::resolution_units)
+        .def_readwrite("compression_type", &charls::spiff_header::compression_type)
+        .def_readwrite("bits_per_sample", &charls::spiff_header::bits_per_sample)
+        .def_readwrite("color_space", &charls::spiff_header::color_space)
+        .def_readwrite("width", &charls::spiff_header::width)
+        .def_readwrite("height", &charls::spiff_header::height)
+        .def_readwrite("component_count", &charls::spiff_header::component_count)
+        .def_readwrite("profile_id", &charls::spiff_header::profile_id);
 
     module.def(
         "encode",
-        [](const py::buffer &src_buffer, const charls::frame_info &frame_info, const py::dict &kwargs) {
+        [](const py::buffer &src_buffer, const charls::frame_info &frame_info, const std::optional<charls::spiff_header> & spiff, const py::kwargs &kwargs) {
             charls::jpegls_encoder encoder;
 
             encoder.frame_info(frame_info);
@@ -203,7 +215,7 @@ PYBIND11_MODULE(_pycharls, module) {
             encoder.near_lossless(near);
             encoder.preset_coding_parameters(preset_coding_parameters(kwargs, frame_info.bits_per_sample, near));
 
-            std::vector<uint8_t> dest(encoder.estimated_destination_size() * 2);
+          std::vector<uint8_t> dest(encoder.estimated_destination_size() * 2);
             encoder.destination(dest);
 
             auto src_buffer_info = src_buffer.request();
@@ -215,14 +227,21 @@ PYBIND11_MODULE(_pycharls, module) {
                 return dest;
             }
 
-            auto bytes_encoded = encoder.encode(src_buffer_info.ptr, src_buffer_info.size);
+          if (spiff) {
+              encoder.write_spiff_header(*spiff);
+          }
+          auto bytes_encoded = encoder.encode(src_buffer_info.ptr, src_buffer_info.size);
             dest.resize(bytes_encoded);
             return dest;
         },
-        "encode a buffer to JPEG-LS");
+        "encode a buffer to JPEG-LS",
+        py::arg("src_buffer"),
+        py::arg("frame_info"),
+        py::arg("spiff") = py::none()
+        );
 
     module.def("read_header",
-        [](const py::buffer & src_buffer) {
+        [](const py::buffer & src_buffer) -> std::variant<charls::frame_info, charls::spiff_header> {
             charls::jpegls_decoder decoder;
             auto src_buffer_info = src_buffer.request();
             decoder.source(src_buffer_info.ptr, src_buffer_info.size);
@@ -230,27 +249,10 @@ PYBIND11_MODULE(_pycharls, module) {
             auto header = decoder.read_spiff_header(spiff_header_present);
             if (!spiff_header_present) {
                 decoder.read_header();
-                auto frame_info = decoder.frame_info();
-                return py::dict(
-                    "component_count"_a=frame_info.component_count,
-                    "height"_a=frame_info.height,
-                    "width"_a=frame_info.width,
-                    "bits_per_sample"_a=frame_info.bits_per_sample
-                );
+                return decoder.frame_info();
             }
 
-            return py::dict(
-                "profile_id"_a=header.profile_id,
-                "component_count"_a=header.component_count,
-                "height"_a=header.height,
-                "width"_a=header.width,
-                "color_space"_a=header.color_space,
-                "bits_per_sample"_a=header.bits_per_sample,
-                "compression_type"_a=header.compression_type,
-                "resolution_units"_a=header.resolution_units,
-                "vertical_resolution"_a=header.vertical_resolution,
-                "horizontal_resolution"_a=header.horizontal_resolution
-            );
+            return header;
         },
         "Read header info from a JPEG-LS stream");
 

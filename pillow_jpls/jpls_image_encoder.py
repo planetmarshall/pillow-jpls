@@ -1,12 +1,19 @@
 from PIL import Image
 
 from . import _pycharls
+from ._pycharls import (
+    SpiffProfileId,
+    SpiffCompressionType,
+    SpiffColorSpace,
+    SpiffResolutionUnits,
+    SpiffHeader
+)
 
 
 _mode_table = {
-    'RGB': (3, 8),
-    'L': (1, 8),
-    'I;16': (1, 16)
+    'RGB': (3, 8, SpiffColorSpace.Rgb),
+    'L': (1, 8, SpiffColorSpace.Grayscale),
+    'I;16': (1, 16, SpiffColorSpace.Grayscale)
 }
 
 
@@ -14,16 +21,40 @@ def modes_to_str():
     return ", ".join(_mode_table.keys())
 
 
+def _spiff_header(image: Image, spiff_header):
+    component_count, bits_per_sample, default_color_space = _mode_table[image.mode]
+    spiff = SpiffHeader()
+    spiff.profile_id = spiff_header.get("profile_id", SpiffProfileId.NotSpecified)
+    spiff.component_count = component_count
+    spiff.height = image.height
+    spiff.width = image.width
+    spiff.color_space = spiff_header.get("color_space", default_color_space)
+    spiff.bits_per_sample = bits_per_sample
+    spiff.compression_type = SpiffCompressionType.JpegLs
+    spiff.resolution_units = spiff_header.get("resolution_units", SpiffResolutionUnits.DotsPerInch)
+    spiff.vertical_resolution = spiff_header.get("vertical_resolution", 96)
+    spiff.horizontal_resolution = spiff_header.get("horizontal_resolution", 96)
+    return spiff
+
+
 def save(image: Image, fp, file_name):
     if image.mode not in _mode_table:
         raise SyntaxError(
             f"Image mode {image.mode} not supported. Convert to one of the supported modes: {modes_to_str()}.")
 
-    component_count, bits_per_sample = _mode_table[image.mode]
+    component_count, bits_per_sample, _ = _mode_table[image.mode]
     frame_info = _pycharls.FrameInfo()
     frame_info.width = image.width
     frame_info.height = image.height
     frame_info.component_count = component_count
     frame_info.bits_per_sample = image.encoderinfo.get("bits_per_sample", bits_per_sample)
-    encoded_bytes = _pycharls.encode(image.tobytes(), frame_info, image.encoderinfo)
+
+    spiff_header = image.encoderinfo.get("spiff", {})
+    header = None
+    if spiff_header is not None:
+        header = _spiff_header(image, spiff_header)
+
+    image.encoderinfo["spiff"] = header
+
+    encoded_bytes = _pycharls.encode(image.tobytes(), frame_info, **image.encoderinfo)
     fp.write(bytes(encoded_bytes))

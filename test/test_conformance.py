@@ -21,7 +21,7 @@ def _encode_to_array(file_name, mode=None, **kwargs):
         src = src.convert(mode)
 
     buffer = BytesIO()
-    src.save(buffer, format="JPEG-LS", **kwargs)
+    src.save(buffer, format="JPEG-LS", spiff=None, **kwargs)
     return np.frombuffer(buffer.getvalue(), dtype=np.uint8).astype(np.int32)
 
 

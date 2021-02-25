@@ -1,6 +1,5 @@
 from PIL.ImageFile import PyDecoder
 
-
 from . import _pycharls
 
 
