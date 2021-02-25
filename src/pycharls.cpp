@@ -39,6 +39,8 @@ class bytes_ : public buffer {
 };
 }
 
+
+
 template<typename T>
 T value_or(const py::dict & kwargs, const char * key, const T & default_value) {
     if (kwargs.contains(key)) {
@@ -149,6 +151,46 @@ PYBIND11_MODULE(_pycharls, module) {
         .def_readwrite("bits_per_sample", &charls::frame_info::bits_per_sample)
         .def_readwrite("component_count", &charls::frame_info::component_count);
 
+    py::enum_<charls::spiff_profile_id>(module, "SpiffProfileId")
+        .value("None", charls::spiff_profile_id::none)
+        .value("BiLevelFacsimile", charls::spiff_profile_id::bi_level_facsimile)
+        .value("ContinuousToneBase", charls::spiff_profile_id::continuous_tone_base)
+        .value("ContinuousToneFacsimile", charls::spiff_profile_id::continuous_tone_facsimile)
+        .value("ContinuousToneProgressive", charls::spiff_profile_id::continuous_tone_progressive)
+        .export_values();
+
+    py::enum_<charls::spiff_color_space>(module, "SpiffColorSpace")
+        .value("None", charls::spiff_color_space::none)
+        .value("BiLevelBlack", charls::spiff_color_space::bi_level_black)
+        .value("BiLevelWhite", charls::spiff_color_space::bi_level_white)
+        .value("CieLab", charls::spiff_color_space::cie_lab)
+        .value("Cmy", charls::spiff_color_space::cmy)
+        .value("Cmyk", charls::spiff_color_space::cmyk)
+        .value("Grayscale", charls::spiff_color_space::grayscale)
+        .value("PhotoYcc", charls::spiff_color_space::photo_ycc)
+        .value("Rgb", charls::spiff_color_space::rgb)
+        .value("YcbcrItuBt6011Rgb", charls::spiff_color_space::ycbcr_itu_bt_601_1_rgb)
+        .value("YcbcrItuBt6011Video", charls::spiff_color_space::ycbcr_itu_bt_601_1_video)
+        .value("YcbcrItuBt709Video", charls::spiff_color_space::ycbcr_itu_bt_709_video)
+        .value("Ycck", charls::spiff_color_space::ycck)
+        .export_values();
+
+    py::enum_<charls::spiff_compression_type>(module, "SpiffCompressionType")
+        .value("Uncompressed", charls::spiff_compression_type::uncompressed)
+        .value("Jbig", charls::spiff_compression_type::jbig)
+        .value("Jpeg", charls::spiff_compression_type::jpeg)
+        .value("JpegLs", charls::spiff_compression_type::jpeg_ls)
+        .value("ModifiedHuffman", charls::spiff_compression_type::modified_huffman)
+        .value("ModifiedModifiedRead", charls::spiff_compression_type::modified_modified_read)
+        .value("ModifiedRead", charls::spiff_compression_type::modified_read)
+        .export_values();
+
+    py::enum_<charls::spiff_resolution_units>(module, "SpiffResolutionUnits")
+        .value("AspectRatio", charls::spiff_resolution_units::aspect_ratio)
+        .value("BiLevelBlack", charls::spiff_resolution_units::dots_per_inch)
+        .value("BiLevelWhite", charls::spiff_resolution_units::dots_per_centimeter)
+        .export_values();
+
     module.def(
         "encode",
         [](const py::buffer &src_buffer, const charls::frame_info &frame_info, const py::dict &kwargs) {
@@ -198,14 +240,14 @@ PYBIND11_MODULE(_pycharls, module) {
             }
 
             return py::dict(
-                "profile_id"_a=static_cast<int32_t>(header.profile_id),
+                "profile_id"_a=header.profile_id,
                 "component_count"_a=header.component_count,
                 "height"_a=header.height,
                 "width"_a=header.width,
-                "color_space"_a=static_cast<int32_t>(header.color_space),
+                "color_space"_a=header.color_space,
                 "bits_per_sample"_a=header.bits_per_sample,
-                "compression_type"_a=static_cast<int32_t>(header.compression_type),
-                "resolution_units"_a=static_cast<int32_t>(header.resolution_units),
+                "compression_type"_a=header.compression_type,
+                "resolution_units"_a=header.resolution_units,
                 "vertical_resolution"_a=header.vertical_resolution,
                 "horizontal_resolution"_a=header.horizontal_resolution
             );
