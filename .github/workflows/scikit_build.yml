@@ -38,9 +38,14 @@ jobs:
       - name: Build wheels with cibuildwheel
         uses: joerick/cibuildwheel@v1.9.0
         env:
-           CIBW_SKIP: cp27-* cp35-*
-           CIBW_TEST_REQUIRES: pytest numpy
+           # Python 2.7 not supported
+           # Python 3.5 Deprecated
+           # Pillow requires zlib to compile for PyPy on Windows
+           CIBW_SKIP: cp27-* cp35-* pp27-* pp36-win32 pp37-win32
+           # numpy > 1.18 requires OpenBlas on macos
+           CIBW_TEST_REQUIRES: pytest numpy==1.18
            CIBW_TEST_COMMAND: pytest -v {project}/test
+           # Pybind std::variant support requires 10.14+
            MACOSX_DEPLOYMENT_TARGET: 10.15
 
       - name: Upload wheel files
