@@ -9,7 +9,7 @@ import numpy as np
 
 @pytest.mark.profile
 def test_roundtrip(data):
-    src = Image.open(os.path.join(data, "artificial.pgm"))
+    src = Image.open(os.path.join(data, "artificial.ppm"))
 
     buffer = BytesIO()
     src.save(buffer, format="JPEG-LS")
