@@ -13,12 +13,14 @@ from ._pycharls import (
 _mode_table = {
     "1": (1, 8, SpiffColorSpace.BiLevelBlack),
     "L": (1, 8, SpiffColorSpace.Grayscale),
+    "P": (1, 8, SpiffColorSpace.Grayscale),
     "RGB": (3, 8, SpiffColorSpace.Rgb),
     "RGBA": (4, 8, SpiffColorSpace.Rgb),
     "LAB": (3, 8, SpiffColorSpace.CieLab),
     "CMYK": (4, 8, SpiffColorSpace.Cmyk),
     "YCbCr": (3, 8, SpiffColorSpace.YCbCrItuBt601Video),
-    "I;16": (1, 16, SpiffColorSpace.Grayscale)
+    "I;16": (1, 16, SpiffColorSpace.Grayscale),
+    "RGB;16": (3, 16, SpiffColorSpace.Rgb),
 }
 
 
@@ -58,6 +60,7 @@ def save(image: Image, fp, file_name):
     header = None
     if spiff_header is not None:
         header = _spiff_header(image, spiff_header)
+        header.bits_per_sample = frame_info.bits_per_sample
 
     image.encoderinfo["spiff"] = header
     if image.mode == "1":
