@@ -58,6 +58,10 @@ def save(image: Image, fp, file_name):
     image.encoderinfo["spiff"] = header
     if image.mode == "1":
         image.encoderinfo["maxval"] = 1
+        # bitmap images are stored in a compressed representation if you use tobytes()
+        data = bytes(image.getdata())
+    else:
+        data = image.tobytes()
 
-    encoded_bytes = _pycharls.encode(bytes(image.getdata()), frame_info, **image.encoderinfo)
+    encoded_bytes = _pycharls.encode(data, frame_info, **image.encoderinfo)
     fp.write(bytes(encoded_bytes))
