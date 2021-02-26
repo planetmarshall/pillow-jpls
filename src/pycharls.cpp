@@ -241,7 +241,8 @@ PYBIND11_MODULE(_pycharls, module) {
         );
 
     module.def("read_header",
-        [](const py::buffer & src_buffer) -> std::variant<charls::frame_info, charls::spiff_header> {
+        [](const py::buffer & src_buffer) {
+            using Header = std::variant<charls::frame_info, charls::spiff_header>;
             charls::jpegls_decoder decoder;
             auto src_buffer_info = src_buffer.request();
             decoder.source(src_buffer_info.ptr, src_buffer_info.size);
@@ -249,10 +250,10 @@ PYBIND11_MODULE(_pycharls, module) {
             auto header = decoder.read_spiff_header(spiff_header_present);
             if (!spiff_header_present) {
                 decoder.read_header();
-                return decoder.frame_info();
+                return Header(decoder.frame_info());
             }
 
-            return header;
+            return Header(header);
         },
         "Read header info from a JPEG-LS stream");
 
