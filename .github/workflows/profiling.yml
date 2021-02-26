@@ -37,4 +37,11 @@ jobs:
 
       - name: Run Valgrind Massif
         run: |
-          valgrind --tool=massif pytest -v --profile --data test/data/profiling test/test_profile.py
+          valgrind --tool=massif --massif-out-file=profile.massif \
+            pytest -v --profile --data test/data/profiling test/test_profile.py
+          ms_print profile.massif
+
+      - name: Upload log files
+        uses: actions/upload-artifact@v2
+        with:
+          path: profile.massif
