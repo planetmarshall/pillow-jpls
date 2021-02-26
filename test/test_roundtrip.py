@@ -28,7 +28,12 @@ def test_bilevel_image():
 
 
 @pytest.mark.parametrize("shape, bits, maxval, dtype, mode, colorspace",[
-    ((42, 23), 8, 255, np.uint8, "L", SpiffColorSpace.Grayscale)
+    ((42, 23), 8, 255, np.uint8, "L", SpiffColorSpace.Grayscale),
+    ((12, 7, 3), 8, 255, np.uint8, "RGB", SpiffColorSpace.Rgb),
+    ((12, 7, 4), 8, 255, np.uint8, "RGBA", SpiffColorSpace.Rgb),
+    ((12, 7, 3), 8, 255, np.uint8, "LAB", SpiffColorSpace.CieLab),
+    ((12, 7, 4), 8, 255, np.uint8, "CMYK", SpiffColorSpace.Cmyk),
+    ((12, 7, 3), 8, 255, np.uint8, "YCbCr", SpiffColorSpace.YCbCrItuBt601Video)
 ])
 def test_encode_with_spiff_header(shape, bits, maxval, dtype, mode, colorspace):
     width = shape[1]

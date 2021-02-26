@@ -168,9 +168,9 @@ PYBIND11_MODULE(_pycharls, module) {
         .value("Grayscale", charls::spiff_color_space::grayscale)
         .value("PhotoYcc", charls::spiff_color_space::photo_ycc)
         .value("Rgb", charls::spiff_color_space::rgb)
-        .value("YcbcrItuBt6011Rgb", charls::spiff_color_space::ycbcr_itu_bt_601_1_rgb)
-        .value("YcbcrItuBt6011Video", charls::spiff_color_space::ycbcr_itu_bt_601_1_video)
-        .value("YcbcrItuBt709Video", charls::spiff_color_space::ycbcr_itu_bt_709_video)
+        .value("YCbCrItuBt601Rgb", charls::spiff_color_space::ycbcr_itu_bt_601_1_rgb)
+        .value("YCbCrItuBt601Video", charls::spiff_color_space::ycbcr_itu_bt_601_1_video)
+        .value("YCbCrItuBt709Video", charls::spiff_color_space::ycbcr_itu_bt_709_video)
         .value("Ycck", charls::spiff_color_space::ycck)
         .export_values();
 

@@ -18,6 +18,7 @@ def _mode(num_components, bits_per_component):
     mode_table = {
         (1, 1): "1",
         (3, 8): "RGB",
+        (4, 8): "RGBA",
         (1, 8): "L",
         (1, 16): "I;16"
     }
@@ -59,6 +60,14 @@ class JplsImageFile(ImageFile):
         color_space = meta.get("color_space")
         if color_space in [SpiffColorSpace.BiLevelBlack, SpiffColorSpace.BiLevelWhite]:
             mode = "1"
+        elif color_space == SpiffColorSpace.CieLab:
+            mode = "LAB"
+        elif color_space == SpiffColorSpace.Cmyk:
+            mode = "CMYK"
+        elif color_space in [SpiffColorSpace.YCbCrItuBt601Video,
+                            SpiffColorSpace.YCbCrItuBt601Rgb,
+                             SpiffColorSpace.YCbCrItuBt709Video]:
+            mode = "YCbCr"
 
         self.info.update(_metadata(header))
         self._size = (header.width, header.height)
