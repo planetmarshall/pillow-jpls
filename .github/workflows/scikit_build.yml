@@ -41,6 +41,7 @@ jobs:
            CIBW_SKIP: cp27-* cp35-*
            CIBW_TEST_REQUIRES: pytest numpy
            CIBW_TEST_COMMAND: pytest -v {project}/test
+           MACOSX_DEPLOYMENT_TARGET: 10.15
 
       - name: Upload wheel files
         uses: actions/upload-artifact@v2
