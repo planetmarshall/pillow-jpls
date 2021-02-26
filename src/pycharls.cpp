@@ -190,7 +190,7 @@ PYBIND11_MODULE(_pycharls, module) {
         .value("DotsPerCentimeter", charls::spiff_resolution_units::dots_per_centimeter)
         .export_values();
 
-    py::class_<charls::spiff_header>(module, "SpiffHeader", py::dynamic_attr())
+    py::class_<charls::spiff_header>(module, "SpiffHeader")
         .def(py::init())
         .def_readwrite("horizontal_resolution", &charls::spiff_header::horizontal_resolution)
         .def_readwrite("vertical_resolution", &charls::spiff_header::vertical_resolution)
