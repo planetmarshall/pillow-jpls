@@ -14,21 +14,27 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          lfs: true
 
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: 3.8
 
-      - name: Install prerequisites
+      - name: Install prerequisites and test data
         run: |
           sudo apt-get install valgrind
           python -m pip install pip --upgrade
           pip install -r requirements.txt
+          mkdir -p test/data/profiling
+          wget https://imagecompression.info/test_images/gray8bit.zip
+          unzip -d test/data/profiling gray8bit.zip
+          rm gray8bit.zip
+          cat test/data/profiling/readme.txt
 
       - name: Build and install package for Valgrind
         run: |
           python setup.py --build-type=RelWithDebInfo install -- -DCMAKE_CXX_FLAGS_RELWITHDEBINFO="-O0 -g"
 
+      - name: Run Valgrind Memcheck
+        run: |
+          valgrind --leak-check=yes pytest --data test/data/profiling test/test_profile.py
