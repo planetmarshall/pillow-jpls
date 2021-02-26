@@ -26,9 +26,8 @@ if(SKBUILD)
     conan_cmake_run(
             CONANFILE conanfile.txt
             BASIC_SETUP
-            PROFILE_AUTO
             CONAN_COMMAND ${PYCHARLS_CONAN_COMMAND}
-            BUILD outdated
+            BUILD missing
     )
 else()
     find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
