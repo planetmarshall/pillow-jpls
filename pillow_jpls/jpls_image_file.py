@@ -65,7 +65,7 @@ class JplsImageFile(ImageFile):
         elif color_space == SpiffColorSpace.Cmyk:
             mode = "CMYK"
         elif color_space in [SpiffColorSpace.YCbCrItuBt601Video,
-                            SpiffColorSpace.YCbCrItuBt601Rgb,
+                             SpiffColorSpace.YCbCrItuBt601Rgb,
                              SpiffColorSpace.YCbCrItuBt709Video]:
             mode = "YCbCr"
 
