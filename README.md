@@ -16,14 +16,14 @@ Usage
 pip install .
 ```
 
-### With PIL
+### With Pillow
 ```.py
 import pillow_jpls
 from PIL import Image
 from io import BytesIO
 
-img = Image.open("mandrill.jls")
-img.save("mandrill_copy.jls)
+img = Image.open("image.jls")
+img.save("image_copy.jls)
 
 # Saving to a buffer
 buffer = BytesIO()
@@ -66,6 +66,12 @@ You will need [git-lfs](https://git-lfs.github.com/) to clone the data.
 pip install pytest .
 pytest -v test
 ```
+
+Limitations
+-----------
+
+16 bit multichannel images are not supported, as these are not supported in Pillow.
+16bit greyscale images are supported, however.
 
 
 References
