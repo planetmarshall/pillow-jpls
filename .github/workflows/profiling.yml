@@ -1,11 +1,6 @@
 name: Profiling
 
 on:
-  push:
-    branches: [ pillow-jpls ]
-  pull_request:
-    branches: [ pillow-jpls ]
-
   workflow_dispatch:
 
 jobs:
@@ -30,6 +25,8 @@ jobs:
       - name: Install prerequisites
         run: |
           sudo apt-get install valgrind
+          python -m pip install pip --upgrade
+          pip install -r requirements.txt
 
       - name: Build and install package for Valgrind
         run: |

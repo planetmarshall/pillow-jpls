@@ -2,9 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [ pillow-jpls ]
+    branches:
+      - main
   pull_request:
-    branches: [ pillow-jpls ]
+    branches:
+      - main
 
   workflow_dispatch:
 
