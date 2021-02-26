@@ -1,6 +1,7 @@
 from PIL.ImageFile import ImageFile
 
 from . import _pycharls
+from ._pycharls import SpiffColorSpace
 
 
 def accept(header):
@@ -15,22 +16,23 @@ def _mode(num_components, bits_per_component):
         bits_per_component = 16
 
     mode_table = {
-        (3, 8): 'RGB',
-        (1, 8): 'L',
-        (1, 16): 'I;16'
+        (1, 1): "1",
+        (3, 8): "RGB",
+        (1, 8): "L",
+        (1, 16): "I;16"
     }
     return mode_table.get((num_components, bits_per_component))
 
 
-def _header_attributes(header):
-    attributes = {
+def _metadata(header):
+    meta = {
         "bits_per_sample": header.bits_per_sample,
         "component_count": header.component_count,
         "width": header.width,
         "height": header.height
     }
     if hasattr(header, "profile_id"):
-        attributes.update({
+        meta.update({
             "color_space": header.color_space,
             "profile_id": header.profile_id,
             "compression_type": header.compression_type,
@@ -38,7 +40,7 @@ def _header_attributes(header):
             "vertical_resolution": header.vertical_resolution,
             "horizontal_resolution": header.horizontal_resolution
         })
-    return attributes
+    return meta
 
 
 class JplsImageFile(ImageFile):
@@ -53,7 +55,12 @@ class JplsImageFile(ImageFile):
         if mode is None:
             raise IOError(f"Mode not supported: components: {header.component_count}, bits: {header.bits_per_sample}")
 
-        self.info.update(_header_attributes(header))
+        meta = _metadata(header)
+        color_space = meta.get("color_space")
+        if color_space in [SpiffColorSpace.BiLevelBlack, SpiffColorSpace.BiLevelWhite]:
+            mode = "1"
+
+        self.info.update(_metadata(header))
         self._size = (header.width, header.height)
         self.mode = mode
-        self.tile = [("jpeg_ls", (0, 0) + self.size, 0, (self.mode, 0))]
+        self.tile = [("jpeg_ls", (0, 0) + self.size, 0, (meta, ))]
