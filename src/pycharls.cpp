@@ -10,7 +10,6 @@
 namespace py = pybind11;
 using namespace py::literals;
 using Mx = Eigen::Array<uint8_t, Eigen::Dynamic, Eigen::Dynamic>;
-using Map = Eigen::Map<Mx>;
 
 namespace pybind11 {
 
@@ -241,42 +240,36 @@ PYBIND11_MODULE(_pycharls, module) {
         );
 
     module.def("read_header",
-        [](const py::buffer & src_buffer) {
-            using Header = std::variant<charls::frame_info, charls::spiff_header>;
+        [](const py::buffer & src_buffer) -> std::variant<charls::frame_info, charls::spiff_header> {
             charls::jpegls_decoder decoder;
             auto src_buffer_info = src_buffer.request();
             decoder.source(src_buffer_info.ptr, src_buffer_info.size);
             bool spiff_header_present{};
             auto header = decoder.read_spiff_header(spiff_header_present);
             if (!spiff_header_present) {
-                decoder.read_header();
-                return Header(decoder.frame_info());
+                return decoder.read_header().frame_info();
             }
 
-            return Header(header);
+            return header;
         },
         "Read header info from a JPEG-LS stream");
 
     module.def("decode", [] (const py::buffer & src_buffer) {
         charls::jpegls_decoder decoder;
         auto src_buffer_info = src_buffer.request();
-        decoder.source(src_buffer_info.ptr, src_buffer_info.size);
-        decoder.read_header();
+        decoder.source(src_buffer_info.ptr, src_buffer_info.size).read_header();
         auto frame_info = decoder.frame_info();
         auto interleave_mode = decoder.interleave_mode();
-        auto params = decoder.preset_coding_parameters();
 
         std::vector<uint8_t> destination_buffer;
         destination_buffer.resize(decoder.destination_size());
 
-      if (interleave_mode == charls::interleave_mode::none && frame_info.component_count > 1) {
-            std::vector<uint8_t> planar_buffer(decoder.destination_size());
-            decoder.decode(planar_buffer);
+        if (interleave_mode == charls::interleave_mode::none && frame_info.component_count > 1) {
             size_t elements_per_component = frame_info.width * frame_info.height;
-            Map dest_view(static_cast<uint8_t *>(destination_buffer.data()), frame_info.component_count, elements_per_component);
-            Map src_view(planar_buffer.data(), elements_per_component, frame_info.component_count);
-
-            dest_view = src_view.transpose();
+            Mx planar_buffer(elements_per_component, frame_info.component_count);
+            decoder.decode(planar_buffer.data(), planar_buffer.size());
+            planar_buffer.transposeInPlace();
+            std::copy(planar_buffer.data(), planar_buffer.data() + planar_buffer.size(), destination_buffer.begin());
             return destination_buffer;
         }
 
