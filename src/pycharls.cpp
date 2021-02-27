@@ -10,6 +10,7 @@
 namespace py = pybind11;
 using namespace py::literals;
 using Mx = Eigen::Array<uint8_t, Eigen::Dynamic, Eigen::Dynamic>;
+using MxView = Eigen::Map<Mx>;
 
 namespace pybind11 {
 
@@ -126,20 +127,6 @@ charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs, i
     return params;
 }
 
-std::vector<uint8_t> interleaved_to_planar(const uint8_t *pBegin, const charls::frame_info &frame_info) {
-    uint32_t samples_per_component = frame_info.width * frame_info.height;
-    uint32_t bytes_per_sample = (frame_info.bits_per_sample + 7) / 8;
-    std::vector<uint8_t> dest_buffer(frame_info.component_count * samples_per_component * bytes_per_sample);
-
-    for (size_t j = 0; j < static_cast<size_t>(frame_info.component_count); ++j) {
-        size_t component_offset = j * samples_per_component;
-        for (size_t i = 0; i < samples_per_component; ++i) {
-            dest_buffer[component_offset + i] = pBegin[i * frame_info.component_count + j];
-        }
-    }
-    return dest_buffer;
-}
-
 PYBIND11_MODULE(_pycharls, module) {
     module.doc() = "Python bindings for CharLS using pybind11";
     py::class_<charls::frame_info>(module, "FrameInfo")
@@ -214,24 +201,30 @@ PYBIND11_MODULE(_pycharls, module) {
             encoder.near_lossless(near);
             encoder.preset_coding_parameters(preset_coding_parameters(kwargs, frame_info.bits_per_sample, near));
 
-          std::vector<uint8_t> dest(encoder.estimated_destination_size() * 2);
-            encoder.destination(dest);
+            std::vector<uint8_t> destination_buffer(encoder.estimated_destination_size() * 2);
+            encoder.destination(destination_buffer);
+
+            if (spiff) {
+                  encoder.write_spiff_header(*spiff);
+            }
 
             auto src_buffer_info = src_buffer.request();
             if (ilv == charls::interleave_mode::none && frame_info.component_count > 1) {
-                std::vector<uint8_t> src =
-                    interleaved_to_planar(static_cast<const uint8_t *>(src_buffer_info.ptr), frame_info);
-                const auto bytes_encoded = encoder.encode(src);
-                dest.resize(bytes_encoded);
-                return dest;
+                size_t elements_per_component = frame_info.width * frame_info.height;
+                Mx planar_buffer = MxView(
+                    static_cast<uint8_t*>(src_buffer_info.ptr),
+                    frame_info.component_count,
+                    elements_per_component
+                );
+                planar_buffer.transposeInPlace();
+                const auto bytes_encoded = encoder.encode(planar_buffer.data(), planar_buffer.size());
+                destination_buffer.resize(bytes_encoded);
+                return destination_buffer;
             }
 
-          if (spiff) {
-              encoder.write_spiff_header(*spiff);
-          }
-          auto bytes_encoded = encoder.encode(src_buffer_info.ptr, src_buffer_info.size);
-            dest.resize(bytes_encoded);
-            return dest;
+            auto bytes_encoded = encoder.encode(src_buffer_info.ptr, src_buffer_info.size);
+            destination_buffer.resize(bytes_encoded);
+            return destination_buffer;
         },
         "encode a buffer to JPEG-LS",
         py::arg("src_buffer"),
