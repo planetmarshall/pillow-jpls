@@ -1,7 +1,7 @@
 JPEG-LS plugin for Python Pillow
 ================================
 
-![Build status](https://github.com/planetmarshall/pillow-jpls/actions/workflows/scikit_build.yml/badge.svg?branch=pillow-jpls)
+![Build status](https://github.com/planetmarshall/pillow-jpls/actions/workflows/build_deploy.yml/badge.svg)
 
 
 A plugin for the Python [Pillow](https://pillow.readthedocs.io/en/stable/) imaging library for the
