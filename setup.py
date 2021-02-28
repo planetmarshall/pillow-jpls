@@ -1,4 +1,5 @@
 import sys
+from os import path
 from setuptools import find_packages
 
 try:
@@ -11,6 +12,10 @@ except ImportError:
     )
     raise
 
+this_directory = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory, 'README.md'), encoding='utf-8') as fp:
+    long_description = fp.read()
+
 setup(
     name="pillow-jpls",
     version="0.0.1",
@@ -19,6 +24,8 @@ setup(
     author_email="andrew@algodynamic.com",
     url="https://github.com/planetmarshall/pillow-jpls",
     license="BSD-3-Clause",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     packages=find_packages(),
     cmake_install_dir="pillow_jpls",
     install_requires=[
