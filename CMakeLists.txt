@@ -40,6 +40,7 @@ find_package(pybind11 REQUIRED)
 find_package(charls REQUIRED)
 find_package(fmt REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(range-v3 REQUIRED)
 
 if (MSVC)
     add_compile_options(/Wall /permissive-)
