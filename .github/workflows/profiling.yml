@@ -1,0 +1,48 @@
+name: Profiling
+
+on:
+  workflow_dispatch:
+
+jobs:
+  valgrind:
+    name: Valgrind Massif
+    runs-on: ubuntu-20.04
+    env:
+      CC: clang
+      CXX: clang++
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Install prerequisites and test data
+        run: |
+          sudo apt-get install valgrind
+          python -m pip install pip --upgrade
+          pip install -r requirements.txt
+          mkdir -p test/data/profiling
+          wget -q https://imagecompression.info/test_images/rgb8bit.zip
+          unzip -d test/data/profiling rgb8bit.zip
+          rm rgb8bit.zip
+          cat test/data/profiling/readme.txt
+
+      - name: Build and install package for Valgrind
+        run: |
+          python setup.py --build-type=RelWithDebInfo install
+
+      - name: Run Valgrind Massif
+        run: |
+          MASSIF_FILE=massif.out.${GITHUB_SHA:0:8}
+          valgrind --tool=massif --massif-out-file=${MASSIF_FILE} \
+            pytest -v --profile --data test/data/profiling test/test_profile.py
+          ms_print ${MASSIF_FILE}
+
+      - name: Upload log files
+        uses: actions/upload-artifact@v2
+        with:
+          path: massif.*
