@@ -9,7 +9,6 @@ target_link_libraries( _pycharls
         charls::charls
         Eigen3::Eigen3
         fmt::fmt
-        range-v3::range-v3
         )
 
 install(TARGETS _pycharls

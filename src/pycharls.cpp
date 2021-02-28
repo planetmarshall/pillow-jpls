@@ -3,7 +3,6 @@
 #include <pybind11/stl.h>
 #include <fmt/format.h>
 #include <Eigen/Core>
-#include <range/v3/algorithm.hpp>
 
 #include <vector>
 #include <variant>
@@ -25,12 +24,19 @@ class bytearray_ : public buffer {
         if (!m_ptr) pybind11_fail("Could not allocate bytes object!");
     }
 
-    explicit bytearray_(size_t len)
+    bytearray_()
         : bytearray_("", 0) {
-        PyByteArray_Resize(m_ptr, len);
     }
 
     void resize(size_t len) { PyByteArray_Resize(m_ptr, len); }
+
+     size_t size() const { return static_cast<size_t>(PyByteArray_Size(m_ptr)); }
+
+    explicit operator std::string() const {
+        char *buffer = PyByteArray_AS_STRING(m_ptr);
+        ssize_t size = PyByteArray_GET_SIZE(m_ptr);
+        return std::string(buffer, static_cast<size_t>(size));
+    }
 };
 }
 
@@ -75,9 +81,14 @@ charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs, i
     // so we handle missing defaults here - see https://github.com/team-charls/charls/issues/84
     charls::jpegls_pc_parameters params{0, 0, 0, 0, 0};
     const std::vector<std::string> keys{ "maxval", "t1", "t2", "t3", "reset" };
-    auto iter = ranges::find_first_of(
-        kwargs, keys, {}, [] ( const auto & arg) -> std::string { return py::str(arg.first); }
-    );
+    auto iter = std::find_first_of(
+        kwargs.begin(),
+        kwargs.end(),
+        keys.begin(),
+        keys.end(),
+        []( const auto & param, const auto & key) {
+            return key == std::string(py::str(param.first));
+        });
 
     if (iter == kwargs.end() && bits_per_sample <= 12) {
         return params;
@@ -189,7 +200,8 @@ PYBIND11_MODULE(_pycharls, module) {
                 .near_lossless(near)
                 .preset_coding_parameters(preset_coding_parameters(kwargs, frame_info.bits_per_sample, near));
 
-            py::bytearray_ destination_buffer(encoder.estimated_destination_size() * 2);
+            py::bytearray_ destination_buffer;
+            destination_buffer.resize(encoder.estimated_destination_size() * 2);
             {
               auto destination_buffer_info = destination_buffer.request();
               encoder.destination(destination_buffer_info.ptr, destination_buffer_info.size);
@@ -245,7 +257,8 @@ PYBIND11_MODULE(_pycharls, module) {
         auto frame_info = decoder.frame_info();
         auto interleave_mode = decoder.interleave_mode();
 
-        py::bytearray_ destination_buffer(decoder.destination_size());
+        py::bytearray_ destination_buffer;
+        destination_buffer.resize(decoder.destination_size());
         auto destination_buffer_info = destination_buffer.request();
 
         if (interleave_mode == charls::interleave_mode::none && frame_info.component_count > 1) {
@@ -253,11 +266,7 @@ PYBIND11_MODULE(_pycharls, module) {
             Mx planar_buffer(elements_per_component, frame_info.component_count);
             decoder.decode(planar_buffer.data(), planar_buffer.size());
             planar_buffer.transposeInPlace();
-            std::copy(
-                planar_buffer.data(),
-                planar_buffer.data() + planar_buffer.size(),
-                static_cast<uint8_t *>(destination_buffer_info.ptr)
-            );
+            std::copy(planar_buffer.data(), planar_buffer.data() + planar_buffer.size(), static_cast<uint8_t *>(destination_buffer_info.ptr));
             return destination_buffer;
         }
 
