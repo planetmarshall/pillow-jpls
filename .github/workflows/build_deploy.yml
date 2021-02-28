@@ -84,3 +84,6 @@ jobs:
           echo ${GITHUB_REF}
           [[ ${GITHUB_REF} == "refs/heads/pillow-jpls" ]] && PYPI_REPOSITORY="--repository testpypi"
           twine upload ${PYPI_REPOSITORY} dist/*
+        env:
+          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
