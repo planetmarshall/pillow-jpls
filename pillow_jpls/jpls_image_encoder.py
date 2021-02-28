@@ -70,5 +70,4 @@ def save(image: Image, fp, file_name):
     else:
         data = image.tobytes()
 
-    encoded_bytes = _pycharls.encode(data, frame_info, **image.encoderinfo)
-    fp.write(bytes(encoded_bytes))
+    fp.write(_pycharls.encode(data, frame_info, **image.encoderinfo))

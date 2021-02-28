@@ -15,22 +15,22 @@ using MxView = Eigen::Map<Mx>;
 namespace pybind11 {
 
 // Bytes object that supports resizing and the buffer protocol
-class bytes_ : public buffer {
+class bytearray_ : public buffer {
   public:
-  PYBIND11_OBJECT_CVT(bytes_, buffer, PyBytes_Check, PyBytes_FromObject)
+  PYBIND11_OBJECT_CVT(bytearray_, buffer, PyByteArray_Check, PyByteArray_FromObject)
 
-    bytes_(const char *c, size_t n)
-        : buffer(PyBytes_FromStringAndSize(c, (ssize_t) n), stolen_t{}) {
+    bytearray_(const char *c, size_t n)
+        : buffer(PyByteArray_FromStringAndSize(c, (ssize_t) n), stolen_t{}) {
         if (!m_ptr) pybind11_fail("Could not allocate bytes object!");
     }
 
-    bytes_()
-        : bytes_("", 0) {
+    bytearray_()
+        : bytearray_("", 0) {
     }
 
-    void resize(size_t len) { _PyBytes_Resize(&m_ptr, len); }
+    void resize(size_t len) { PyByteArray_Resize(m_ptr, len); }
 
-    size_t size() const { return static_cast<size_t>(PyByteArray_Size(m_ptr)); }
+     size_t size() const { return static_cast<size_t>(PyByteArray_Size(m_ptr)); }
 
     explicit operator std::string() const {
         char *buffer = PyByteArray_AS_STRING(m_ptr);
@@ -45,7 +45,6 @@ T value_or(const py::dict & kwargs, const char * key, const T & default_value) {
     if (kwargs.contains(key)) {
         return kwargs[key].cast<T>();
     }
-
     return default_value;
 }
 
@@ -194,15 +193,19 @@ PYBIND11_MODULE(_pycharls, module) {
         [](const py::buffer &src_buffer, const charls::frame_info &frame_info, const std::optional<charls::spiff_header> & spiff, const py::kwargs &kwargs) {
             charls::jpegls_encoder encoder;
 
-            encoder.frame_info(frame_info);
             auto ilv = frame_info.component_count == 1 ? charls::interleave_mode::none : interleave_mode(kwargs);
-            encoder.interleave_mode(ilv);
             auto near = value_or<int32_t>(kwargs, "near_lossless", 0);
-            encoder.near_lossless(near);
-            encoder.preset_coding_parameters(preset_coding_parameters(kwargs, frame_info.bits_per_sample, near));
+            encoder.frame_info(frame_info)
+                .interleave_mode(ilv)
+                .near_lossless(near)
+                .preset_coding_parameters(preset_coding_parameters(kwargs, frame_info.bits_per_sample, near));
 
-            std::vector<uint8_t> destination_buffer(encoder.estimated_destination_size() * 2);
-            encoder.destination(destination_buffer);
+            py::bytearray_ destination_buffer;
+            destination_buffer.resize(encoder.estimated_destination_size() * 2);
+            {
+              auto destination_buffer_info = destination_buffer.request();
+              encoder.destination(destination_buffer_info.ptr, destination_buffer_info.size);
+            }
 
             if (spiff) {
                   encoder.write_spiff_header(*spiff);
@@ -254,19 +257,20 @@ PYBIND11_MODULE(_pycharls, module) {
         auto frame_info = decoder.frame_info();
         auto interleave_mode = decoder.interleave_mode();
 
-        std::vector<uint8_t> destination_buffer;
+        py::bytearray_ destination_buffer;
         destination_buffer.resize(decoder.destination_size());
+        auto destination_buffer_info = destination_buffer.request();
 
         if (interleave_mode == charls::interleave_mode::none && frame_info.component_count > 1) {
             size_t elements_per_component = frame_info.width * frame_info.height;
             Mx planar_buffer(elements_per_component, frame_info.component_count);
             decoder.decode(planar_buffer.data(), planar_buffer.size());
             planar_buffer.transposeInPlace();
-            std::copy(planar_buffer.data(), planar_buffer.data() + planar_buffer.size(), destination_buffer.begin());
+            std::copy(planar_buffer.data(), planar_buffer.data() + planar_buffer.size(), static_cast<uint8_t *>(destination_buffer_info.ptr));
             return destination_buffer;
         }
 
-        decoder.decode(destination_buffer);
+        decoder.decode(destination_buffer_info.ptr, destination_buffer_info.size);
         return destination_buffer;
     }, "Decode a JPEG-LS stream");
 
