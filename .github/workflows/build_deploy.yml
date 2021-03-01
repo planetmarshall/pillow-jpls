@@ -59,7 +59,7 @@ jobs:
 
   deploy_pypi:
     name: Deploy to PyPi
-    if: ${{ github.event.release.created || github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == "release" || github.ref == 'refs/heads/main' }}
     needs: build_wheels
     runs-on: ubuntu-20.04
     steps:
