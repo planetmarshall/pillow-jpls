@@ -59,7 +59,7 @@ jobs:
 
   deploy_pypi:
     name: Deploy to PyPi
-    if: ${{ github.event.release.created || github.ref == 'refs/heads/pillow-jpls' }}
+    if: ${{ github.event.release.created || github.ref == 'refs/heads/main' }}
     needs: build_wheels
     runs-on: ubuntu-20.04
     steps:
@@ -82,7 +82,7 @@ jobs:
       - name: Upload to PyPi
         run: |
           echo ${GITHUB_REF}
-          [[ ${GITHUB_REF} == "refs/heads/pillow-jpls" ]] && PYPI_REPOSITORY="--repository testpypi"
+          [[ ${GITHUB_REF} == "refs/heads/main" ]] && PYPI_REPOSITORY="--repository testpypi"
           twine upload ${PYPI_REPOSITORY} dist/*
         env:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
