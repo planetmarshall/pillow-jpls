@@ -13,9 +13,9 @@ on:
 
   workflow_dispatch:
     inputs:
-    upload:
-      description: 'Upload to PyPi Test'
-      default: false
+      upload:
+        description: 'Upload to PyPi Test'
+        default: false
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
