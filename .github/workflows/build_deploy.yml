@@ -12,7 +12,10 @@ on:
       - created
 
   workflow_dispatch:
-
+    inputs:
+    upload:
+      description: 'Upload to PyPi Test'
+      default: false
 jobs:
   build_wheels:
     name: Build wheels on ${{ matrix.os }}
@@ -59,7 +62,7 @@ jobs:
 
   deploy_pypi:
     name: Deploy to PyPi
-    if: ${{ github.event_name == 'release' || github.ref == 'refs/heads/main' }}
+    if: ${{ github.event_name == 'release' || github.event.inputs.upload }}
     needs: build_wheels
     runs-on: ubuntu-20.04
     steps:
@@ -81,8 +84,8 @@ jobs:
 
       - name: Upload to PyPi
         run: |
-          echo ${GITHUB_REF}
-          [[ ${GITHUB_REF} == "refs/heads/main" ]] && PYPI_REPOSITORY="--repository testpypi"
+          PYPI_REPOSITORY="--repository testpypi"
+          [[ ${GITHUB_EVENT_NAME} == "release" ]] && PYPI_REPOSITORY=""
           twine upload --skip-existing ${PYPI_REPOSITORY} dist/*
         env:
           TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
