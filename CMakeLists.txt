@@ -23,13 +23,9 @@ if(SKBUILD)
         file(DOWNLOAD "https://github.com/conan-io/cmake-conan/raw/v0.15/conan.cmake" "${CMAKE_BINARY_DIR}/conan.cmake")
     endif()
     include(${CMAKE_BINARY_DIR}/conan.cmake)
-    conan_cmake_run(
-            CONANFILE conanfile.txt
-            BASIC_SETUP
-            PROFILE_AUTO
-            CONAN_COMMAND ${PYCHARLS_CONAN_COMMAND}
-            BUILD outdated
-    )
+    conan_cmake_configure()
+    conan_cmake_autodetect(settings)
+    conan_cmake_install(PATH_OR_REFERENCE . BUILD missing)
 else()
     find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
@@ -45,6 +41,9 @@ if (MSVC)
     add_compile_options(/Wall /permissive-)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
+    if (CMAKE_CXX_COMPILER_ID MATCHES Clang$)
+        add_compile_options(-Wconversion -Wconditional-uninitialized)
+    endif()
 endif()
 
 add_subdirectory(src)
