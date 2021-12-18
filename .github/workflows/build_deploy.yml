@@ -53,6 +53,7 @@ jobs:
            # numpy > 1.18 requires OpenBlas on macos
            CIBW_TEST_REQUIRES: pytest numpy==1.18
            CIBW_TEST_COMMAND: pytest -v {project}/test
+           CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
            # Pybind std::variant support requires 10.14+
            MACOSX_DEPLOYMENT_TARGET: 10.15
 
