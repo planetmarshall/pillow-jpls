@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(Pycharls VERSION 1.1.0)
+project(Pycharls VERSION 1.1.1)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 if(SKBUILD)
