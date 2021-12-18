@@ -10,6 +10,8 @@ on:
   release:
     types:
       - created
+  schedule:
+    - cron: '0 0 1 * *'
 
   workflow_dispatch:
     inputs:
@@ -22,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, windows-2016, macos-10.15 ]
+        os: [ ubuntu-20.04, windows-2019, macos-11 ]
 
     steps:
       - name: Checkout repository
@@ -42,7 +44,7 @@ jobs:
           flake8 --count --max-line-length=120 --statistics pillow_jpls
 
       - name: Build wheels with cibuildwheel
-        uses: joerick/cibuildwheel@v1.9.0
+        uses: joerick/cibuildwheel@v2.3.1
         env:
            # Python 2.7 not supported
            # Python 3.5 Deprecated
@@ -51,8 +53,6 @@ jobs:
            # numpy > 1.18 requires OpenBlas on macos
            CIBW_TEST_REQUIRES: pytest numpy==1.18
            CIBW_TEST_COMMAND: pytest -v {project}/test
-           # Pybind std::variant support requires 10.14+
-           MACOSX_DEPLOYMENT_TARGET: 10.15
 
       - name: Upload wheel files
         uses: actions/upload-artifact@v2
