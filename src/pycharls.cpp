@@ -1,11 +1,15 @@
+#pragma warning(disable : 4191 4686)
+#pragma warning(push, 3)
 #include <charls/charls.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <fmt/format.h>
 #include <Eigen/Core>
+#pragma warning(pop)
 
 #include <vector>
 #include <variant>
+
 
 namespace py = pybind11;
 using namespace py::literals;
@@ -129,13 +133,18 @@ charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs, i
 
 PYBIND11_MODULE(_pycharls, module) {
     module.doc() = "Python bindings for CharLS using pybind11";
+#pragma warning(push)
+#pragma warning(disable : 4191 4371)
     py::class_<charls::frame_info>(module, "FrameInfo")
         .def(py::init())
         .def_readwrite("width", &charls::frame_info::width)
         .def_readwrite("height", &charls::frame_info::height)
         .def_readwrite("bits_per_sample", &charls::frame_info::bits_per_sample)
         .def_readwrite("component_count", &charls::frame_info::component_count);
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4355)
     py::enum_<charls::spiff_profile_id>(module, "SpiffProfileId")
         .value("NotSpecified", charls::spiff_profile_id::none)
         .value("BiLevelFacsimile", charls::spiff_profile_id::bi_level_facsimile)
@@ -143,7 +152,10 @@ PYBIND11_MODULE(_pycharls, module) {
         .value("ContinuousToneFacsimile", charls::spiff_profile_id::continuous_tone_facsimile)
         .value("ContinuousToneProgressive", charls::spiff_profile_id::continuous_tone_progressive)
         .export_values();
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4355)
     py::enum_<charls::spiff_color_space>(module, "SpiffColorSpace")
         .value("NotSpecified", charls::spiff_color_space::none)
         .value("BiLevelBlack", charls::spiff_color_space::bi_level_black)
@@ -159,7 +171,11 @@ PYBIND11_MODULE(_pycharls, module) {
         .value("YCbCrItuBt709Video", charls::spiff_color_space::ycbcr_itu_bt_709_video)
         .value("Ycck", charls::spiff_color_space::ycck)
         .export_values();
+#pragma warning(pop)
 
+
+#pragma warning(push)
+#pragma warning(disable : 4355)
     py::enum_<charls::spiff_compression_type>(module, "SpiffCompressionType")
         .value("Uncompressed", charls::spiff_compression_type::uncompressed)
         .value("Jbig", charls::spiff_compression_type::jbig)
@@ -169,13 +185,19 @@ PYBIND11_MODULE(_pycharls, module) {
         .value("ModifiedModifiedRead", charls::spiff_compression_type::modified_modified_read)
         .value("ModifiedRead", charls::spiff_compression_type::modified_read)
         .export_values();
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4355)
     py::enum_<charls::spiff_resolution_units>(module, "SpiffResolutionUnits")
         .value("AspectRatio", charls::spiff_resolution_units::aspect_ratio)
         .value("DotsPerInch", charls::spiff_resolution_units::dots_per_inch)
         .value("DotsPerCentimeter", charls::spiff_resolution_units::dots_per_centimeter)
         .export_values();
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4355 4371)
     py::class_<charls::spiff_header>(module, "SpiffHeader")
         .def(py::init())
         .def_readwrite("horizontal_resolution", &charls::spiff_header::horizontal_resolution)
@@ -188,7 +210,10 @@ PYBIND11_MODULE(_pycharls, module) {
         .def_readwrite("height", &charls::spiff_header::height)
         .def_readwrite("component_count", &charls::spiff_header::component_count)
         .def_readwrite("profile_id", &charls::spiff_header::profile_id);
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4686)
     module.def(
         "encode",
         [](const py::buffer &src_buffer, const charls::frame_info &frame_info, const std::optional<charls::spiff_header> & spiff, const py::kwargs &kwargs) {
@@ -235,6 +260,7 @@ PYBIND11_MODULE(_pycharls, module) {
         py::arg("frame_info"),
         py::arg("spiff") = py::none()
         );
+#pragma warning(pop)
 
     module.def("read_header",
         [](const py::buffer & src_buffer) -> std::variant<charls::frame_info, charls::spiff_header> {
