@@ -50,10 +50,12 @@ jobs:
            # Python 3.5 Deprecated
            # Pillow requires zlib to compile for PyPy on Windows
            # PyPy builds dont support conan
-           CIBW_SKIP: cp27-* cp35-* pp*
+           # Pillow doesn't build on musilinux'
+           CIBW_SKIP: cp27-* cp35-* pp* *-musllinux*
            CIBW_TEST_REQUIRES: pytest numpy
            CIBW_TEST_COMMAND: pytest -v {project}/test
            CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
+           CIBW_BUILD_VERBOSITY: 1
            # Pybind std::variant support requires 10.14+
            MACOSX_DEPLOYMENT_TARGET: 10.15
 
