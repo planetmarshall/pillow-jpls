@@ -50,8 +50,7 @@ jobs:
            # Python 3.5 Deprecated
            # Pillow requires zlib to compile for PyPy on Windows
            CIBW_SKIP: cp27-* cp35-* pp27-* pp36-win32 pp37-win32
-           # numpy > 1.18 requires OpenBlas on macos
-           CIBW_TEST_REQUIRES: pytest numpy==1.18
+           CIBW_TEST_REQUIRES: pytest numpy
            CIBW_TEST_COMMAND: pytest -v {project}/test
            CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
            # Pybind std::variant support requires 10.14+
