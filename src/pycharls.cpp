@@ -15,6 +15,8 @@ using MxView = Eigen::Map<Mx>;
 namespace pybind11 {
 
 // Bytes object that supports resizing and the buffer protocol
+#pragma warning(push)
+#pragma warning(disable : 4514)
 class bytearray_ : public buffer {
   public:
   PYBIND11_OBJECT_CVT(bytearray_, buffer, PyByteArray_Check, PyByteArray_FromObject)
@@ -30,14 +32,13 @@ class bytearray_ : public buffer {
 
     void resize(size_t len) { PyByteArray_Resize(m_ptr, static_cast<Py_ssize_t>(len)); }
 
-     size_t size() const { return static_cast<size_t>(PyByteArray_Size(m_ptr)); }
-
     explicit operator std::string() const {
         char *buffer = PyByteArray_AS_STRING(m_ptr);
         ssize_t size = PyByteArray_GET_SIZE(m_ptr);
-        return std::string(buffer, static_cast<size_t>(size));
+        return {buffer, static_cast<size_t>(size)};
     }
 };
+#pragma warning(pop)
 }
 
 template<typename T>
