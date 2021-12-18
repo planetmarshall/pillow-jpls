@@ -1,11 +1,14 @@
+#pragma warning(push, 0)
 #include <charls/charls.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <fmt/format.h>
 #include <Eigen/Core>
+#pragma warning(pop)
 
 #include <vector>
 #include <variant>
+
 
 namespace py = pybind11;
 using namespace py::literals;
@@ -15,6 +18,8 @@ using MxView = Eigen::Map<Mx>;
 namespace pybind11 {
 
 // Bytes object that supports resizing and the buffer protocol
+#pragma warning(push)
+#pragma warning(disable : 4514)
 class bytearray_ : public buffer {
   public:
   PYBIND11_OBJECT_CVT(bytearray_, buffer, PyByteArray_Check, PyByteArray_FromObject)
@@ -28,16 +33,15 @@ class bytearray_ : public buffer {
         : bytearray_("", 0) {
     }
 
-    void resize(size_t len) { PyByteArray_Resize(m_ptr, len); }
-
-     size_t size() const { return static_cast<size_t>(PyByteArray_Size(m_ptr)); }
+    void resize(size_t len) { PyByteArray_Resize(m_ptr, static_cast<Py_ssize_t>(len)); }
 
     explicit operator std::string() const {
         char *buffer = PyByteArray_AS_STRING(m_ptr);
         ssize_t size = PyByteArray_GET_SIZE(m_ptr);
-        return std::string(buffer, static_cast<size_t>(size));
+        return {buffer, static_cast<size_t>(size)};
     }
 };
+#pragma warning(pop)
 }
 
 template<typename T>
@@ -94,7 +98,7 @@ charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs, i
         return params;
     }
 
-    params.maximum_sample_value = value_or<int32_t>(kwargs, "maxval", std::pow(2, bits_per_sample) - 1);
+    params.maximum_sample_value = value_or<int32_t>(kwargs, "maxval", static_cast<int32_t >(std::pow(2, bits_per_sample) - 1));
     params.reset_value = value_or<int32_t>(kwargs, "reset", 64);
 
     const int32_t basic_t1 = 3;
@@ -128,13 +132,18 @@ charls::jpegls_pc_parameters preset_coding_parameters(const py::dict & kwargs, i
 
 PYBIND11_MODULE(_pycharls, module) {
     module.doc() = "Python bindings for CharLS using pybind11";
+#pragma warning(push)
+#pragma warning(disable : 4191 4371)
     py::class_<charls::frame_info>(module, "FrameInfo")
         .def(py::init())
         .def_readwrite("width", &charls::frame_info::width)
         .def_readwrite("height", &charls::frame_info::height)
         .def_readwrite("bits_per_sample", &charls::frame_info::bits_per_sample)
         .def_readwrite("component_count", &charls::frame_info::component_count);
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4355)
     py::enum_<charls::spiff_profile_id>(module, "SpiffProfileId")
         .value("NotSpecified", charls::spiff_profile_id::none)
         .value("BiLevelFacsimile", charls::spiff_profile_id::bi_level_facsimile)
@@ -142,7 +151,10 @@ PYBIND11_MODULE(_pycharls, module) {
         .value("ContinuousToneFacsimile", charls::spiff_profile_id::continuous_tone_facsimile)
         .value("ContinuousToneProgressive", charls::spiff_profile_id::continuous_tone_progressive)
         .export_values();
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4355)
     py::enum_<charls::spiff_color_space>(module, "SpiffColorSpace")
         .value("NotSpecified", charls::spiff_color_space::none)
         .value("BiLevelBlack", charls::spiff_color_space::bi_level_black)
@@ -158,7 +170,11 @@ PYBIND11_MODULE(_pycharls, module) {
         .value("YCbCrItuBt709Video", charls::spiff_color_space::ycbcr_itu_bt_709_video)
         .value("Ycck", charls::spiff_color_space::ycck)
         .export_values();
+#pragma warning(pop)
 
+
+#pragma warning(push)
+#pragma warning(disable : 4355)
     py::enum_<charls::spiff_compression_type>(module, "SpiffCompressionType")
         .value("Uncompressed", charls::spiff_compression_type::uncompressed)
         .value("Jbig", charls::spiff_compression_type::jbig)
@@ -168,13 +184,19 @@ PYBIND11_MODULE(_pycharls, module) {
         .value("ModifiedModifiedRead", charls::spiff_compression_type::modified_modified_read)
         .value("ModifiedRead", charls::spiff_compression_type::modified_read)
         .export_values();
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4355)
     py::enum_<charls::spiff_resolution_units>(module, "SpiffResolutionUnits")
         .value("AspectRatio", charls::spiff_resolution_units::aspect_ratio)
         .value("DotsPerInch", charls::spiff_resolution_units::dots_per_inch)
         .value("DotsPerCentimeter", charls::spiff_resolution_units::dots_per_centimeter)
         .export_values();
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4355 4371)
     py::class_<charls::spiff_header>(module, "SpiffHeader")
         .def(py::init())
         .def_readwrite("horizontal_resolution", &charls::spiff_header::horizontal_resolution)
@@ -187,7 +209,10 @@ PYBIND11_MODULE(_pycharls, module) {
         .def_readwrite("height", &charls::spiff_header::height)
         .def_readwrite("component_count", &charls::spiff_header::component_count)
         .def_readwrite("profile_id", &charls::spiff_header::profile_id);
+#pragma warning(pop)
 
+#pragma warning(push)
+#pragma warning(disable : 4686)
     module.def(
         "encode",
         [](const py::buffer &src_buffer, const charls::frame_info &frame_info, const std::optional<charls::spiff_header> & spiff, const py::kwargs &kwargs) {
@@ -204,7 +229,7 @@ PYBIND11_MODULE(_pycharls, module) {
             destination_buffer.resize(encoder.estimated_destination_size() * 2);
             {
               auto destination_buffer_info = destination_buffer.request();
-              encoder.destination(destination_buffer_info.ptr, destination_buffer_info.size);
+              encoder.destination(destination_buffer_info.ptr, static_cast<size_t>(destination_buffer_info.size));
             }
 
             if (spiff) {
@@ -217,15 +242,15 @@ PYBIND11_MODULE(_pycharls, module) {
                 Mx planar_buffer = MxView(
                     static_cast<uint8_t*>(src_buffer_info.ptr),
                     frame_info.component_count,
-                    elements_per_component
+                    static_cast<Eigen::Index>(elements_per_component)
                 );
                 planar_buffer.transposeInPlace();
-                const auto bytes_encoded = encoder.encode(planar_buffer.data(), planar_buffer.size());
+                const auto bytes_encoded = encoder.encode(planar_buffer.data(), static_cast<size_t>(planar_buffer.size()));
                 destination_buffer.resize(bytes_encoded);
                 return destination_buffer;
             }
 
-            auto bytes_encoded = encoder.encode(src_buffer_info.ptr, src_buffer_info.size);
+            auto bytes_encoded = encoder.encode(src_buffer_info.ptr, static_cast<size_t>(src_buffer_info.size));
             destination_buffer.resize(bytes_encoded);
             return destination_buffer;
         },
@@ -234,26 +259,26 @@ PYBIND11_MODULE(_pycharls, module) {
         py::arg("frame_info"),
         py::arg("spiff") = py::none()
         );
+#pragma warning(pop)
 
     module.def("read_header",
         [](const py::buffer & src_buffer) -> std::variant<charls::frame_info, charls::spiff_header> {
             charls::jpegls_decoder decoder;
             auto src_buffer_info = src_buffer.request();
-            decoder.source(src_buffer_info.ptr, src_buffer_info.size);
-            bool spiff_header_present{};
-            auto header = decoder.read_spiff_header(spiff_header_present);
+            decoder.source(src_buffer_info.ptr, static_cast<size_t>(src_buffer_info.size));
+            bool spiff_header_present = decoder.read_spiff_header();
             if (!spiff_header_present) {
                 return decoder.read_header().frame_info();
             }
 
-            return header;
+            return decoder.spiff_header();
         },
         "Read header info from a JPEG-LS stream");
 
     module.def("decode", [] (const py::buffer & src_buffer) {
         charls::jpegls_decoder decoder;
         auto src_buffer_info = src_buffer.request();
-        decoder.source(src_buffer_info.ptr, src_buffer_info.size).read_header();
+        decoder.source(src_buffer_info.ptr, static_cast<size_t>(src_buffer_info.size)).read_header();
         auto frame_info = decoder.frame_info();
         auto interleave_mode = decoder.interleave_mode();
 
@@ -264,13 +289,13 @@ PYBIND11_MODULE(_pycharls, module) {
         if (interleave_mode == charls::interleave_mode::none && frame_info.component_count > 1) {
             size_t elements_per_component = frame_info.width * frame_info.height;
             Mx planar_buffer(elements_per_component, frame_info.component_count);
-            decoder.decode(planar_buffer.data(), planar_buffer.size());
+            decoder.decode(planar_buffer.data(), static_cast<size_t>(planar_buffer.size()));
             planar_buffer.transposeInPlace();
             std::copy(planar_buffer.data(), planar_buffer.data() + planar_buffer.size(), static_cast<uint8_t *>(destination_buffer_info.ptr));
             return destination_buffer;
         }
 
-        decoder.decode(destination_buffer_info.ptr, destination_buffer_info.size);
+        decoder.decode(destination_buffer_info.ptr, static_cast<size_t>(destination_buffer_info.size));
         return destination_buffer;
     }, "Decode a JPEG-LS stream");
 

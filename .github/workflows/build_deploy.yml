@@ -10,6 +10,8 @@ on:
   release:
     types:
       - created
+  schedule:
+    - cron: '0 0 1 * *'
 
   workflow_dispatch:
     inputs:
@@ -22,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, windows-2016, macos-10.15 ]
+        os: [ ubuntu-20.04, windows-2019, macos-11 ]
 
     steps:
       - name: Checkout repository
@@ -42,15 +44,19 @@ jobs:
           flake8 --count --max-line-length=120 --statistics pillow_jpls
 
       - name: Build wheels with cibuildwheel
-        uses: joerick/cibuildwheel@v1.9.0
+        uses: joerick/cibuildwheel@v2.3.1
         env:
            # Python 2.7 not supported
            # Python 3.5 Deprecated
            # Pillow requires zlib to compile for PyPy on Windows
-           CIBW_SKIP: cp27-* cp35-* pp27-* pp36-win32 pp37-win32
-           # numpy > 1.18 requires OpenBlas on macos
-           CIBW_TEST_REQUIRES: pytest numpy==1.18
+           # PyPy builds dont support conan
+           # Pillow doesn't build on musilinux'
+           CIBW_SKIP: cp27-* cp35-* pp* *-musllinux*
+           CIBW_TEST_REQUIRES: pytest numpy
            CIBW_TEST_COMMAND: pytest -v {project}/test
+           CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
+           CIBW_BUILD_VERBOSITY: 1
+           CIBW_TEST_SKIP: "*-macosx_arm64"
            # Pybind std::variant support requires 10.14+
            MACOSX_DEPLOYMENT_TARGET: 10.15
 
@@ -60,33 +66,41 @@ jobs:
             name: pillow_jpls_wheels
             path: ./wheelhouse/*.whl
 
-  deploy_pypi:
-    name: Deploy to PyPi
-    if: ${{ github.event_name == 'release' || github.event.inputs.upload }}
-    needs: build_wheels
+  make_sdist:
+    name: Make SDist
     runs-on: ubuntu-20.04
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v2
+
+      - name: Build SDist
+        run: pipx run build --sdist
+
+      - uses: actions/upload-artifact@v2
         with:
-          python-version: 3.8
+          path: dist/*.tar.gz
 
-      - name: Install Preprequisites
-        run: |
-          python -m pip install --upgrade pip
-          pip install twine
-
-      - name: Download built wheels
+  deploy_pypi:
+    name: Deploy to PyPi
+    if: ${{ (github.event_name == 'release' && github.event.action == 'published') || github.event.inputs.upload }}
+    needs: [build_wheels, make_sdist]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
-          name: pillow_jpls_wheels
+          name: artifact
           path: dist
 
-      - name: Upload to PyPi
-        run: |
-          PYPI_REPOSITORY="--repository testpypi"
-          [[ ${GITHUB_EVENT_NAME} == "release" ]] && PYPI_REPOSITORY=""
-          twine upload --skip-existing ${PYPI_REPOSITORY} dist/*
-        env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
+      - name: Publish a Python distribution to PyPI
+        if: github.event_name == 'release'
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Publish package to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository_url: https://test.pypi.org/legacy/
