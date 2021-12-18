@@ -1,5 +1,4 @@
-#pragma warning(disable : 4191 4686)
-#pragma warning(push, 3)
+#pragma warning(push, 0)
 #include <charls/charls.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>

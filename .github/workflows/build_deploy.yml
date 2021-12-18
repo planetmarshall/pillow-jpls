@@ -49,7 +49,8 @@ jobs:
            # Python 2.7 not supported
            # Python 3.5 Deprecated
            # Pillow requires zlib to compile for PyPy on Windows
-           CIBW_SKIP: cp27-* cp35-* pp27-* pp36-win32 pp37-win32
+           # PyPy builds dont support conan
+           CIBW_SKIP: cp27-* cp35-* pp*
            CIBW_TEST_REQUIRES: pytest numpy
            CIBW_TEST_COMMAND: pytest -v {project}/test
            CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
