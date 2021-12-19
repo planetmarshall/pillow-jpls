@@ -9,7 +9,7 @@ on:
       - main
   release:
     types:
-      - created
+      - published
   schedule:
     - cron: '0 0 1 * *'
 
@@ -80,7 +80,7 @@ jobs:
 
   deploy_pypi:
     name: Deploy to PyPi
-    if: ${{ (github.event_name == 'release' && github.event.action == 'published') || github.event.inputs.upload }}
+    if: (github.event_name == 'release' && github.event.action == 'published') || github.event.inputs.upload
     needs: [build_wheels, make_sdist]
     runs-on: ubuntu-20.04
     steps:
@@ -91,13 +91,14 @@ jobs:
           path: dist
 
       - name: Publish a Python distribution to PyPI
-        if: github.event_name == 'release'
+        if: github.ref == 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Publish package to TestPyPI
+        if: github.ref != 'refs/heads/main'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
