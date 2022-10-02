@@ -21,7 +21,7 @@ if(SKBUILD)
             SETTINGS ${settings}
     )
 else()
-    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+    find_package(Python REQUIRED COMPONENTS Interpreter Development)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
 endif()
