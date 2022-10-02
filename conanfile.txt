@@ -1,6 +1,6 @@
 [requires]
-charls/2.2.0
-pybind11/2.8.1
+charls/2.3.4
+pybind11/2.10.0
 fmt/8.0.1
 eigen/3.4.0
 
