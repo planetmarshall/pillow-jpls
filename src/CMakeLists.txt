@@ -2,6 +2,7 @@ Python_add_library(_pycharls pycharls.cpp)
 
 set_target_properties(_pycharls PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ON
+        CXX_VISIBILITY_PRESET hidden
         VISIBILITY_INLINES_HIDDEN ON)
 
 target_compile_features(_pycharls PRIVATE cxx_std_17)

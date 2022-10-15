@@ -12,6 +12,10 @@
 #include <vector>
 #include <variant>
 
+#ifdef GCC
+
+#endif
+
 
 namespace py = pybind11;
 using namespace py::literals;
@@ -23,7 +27,7 @@ namespace pybind11 {
 // Bytes object that supports resizing and the buffer protocol
 #pragma warning(push)
 #pragma warning(disable : 4514)
-class __attribute__ ((visibility("hidden"))) bytearray_ : public buffer {
+class bytearray_ : public buffer {
   public:
   PYBIND11_OBJECT_CVT(bytearray_, buffer, PyByteArray_Check, PyByteArray_FromObject)
 
