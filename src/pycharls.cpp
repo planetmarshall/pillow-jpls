@@ -3,7 +3,10 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <fmt/format.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include <Eigen/Core>
+#pragma GCC diagnostic pop
 #pragma warning(pop)
 
 #include <vector>
