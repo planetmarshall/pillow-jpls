@@ -3,10 +3,9 @@ cmake_minimum_required(VERSION 3.18)
 project(Pycharls VERSION 1.1.0)
 
 option(PYCHARLS_COMPILE_STRICT "Treat compiler warnings as errors" ON)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 if(SKBUILD)
     set(Python_EXECUTABLE "${PYTHON_EXECUTABLE}")
-    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 
     if(NOT EXISTS "${CMAKE_BINARY_DIR}/conan.cmake")
         message(STATUS "Downloading conan.cmake from https://github.com/conan-io/cmake-conan")
@@ -21,15 +20,14 @@ if(SKBUILD)
             SETTINGS ${settings}
     )
 else()
-    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
 endif()
-
-find_package(pybind11 REQUIRED)
-find_package(charls REQUIRED)
-find_package(fmt REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(Python COMPONENTS Interpreter Development)
+find_package(pybind11 CONFIG REQUIRED)
+find_package(charls CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
+find_package(Eigen3 CONFIG REQUIRED)
 
 if (MSVC)
     add_compile_options(/Wall /permissive-)
@@ -47,4 +45,3 @@ else()
 endif()
 
 add_subdirectory(src)
-
