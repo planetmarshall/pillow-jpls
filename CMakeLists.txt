@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18)
 
-project(Pycharls VERSION 1.2.0)
+project(Pycharls VERSION 1.1.0)
 
 option(PYCHARLS_COMPILE_STRICT "Treat compiler warnings as errors" ON)
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
@@ -23,7 +23,7 @@ else()
     include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
     conan_basic_setup()
 endif()
-
+find_package(Python COMPONENTS Interpreter Development)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(charls CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
