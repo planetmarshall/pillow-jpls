@@ -23,7 +23,7 @@ namespace pybind11 {
 // Bytes object that supports resizing and the buffer protocol
 #pragma warning(push)
 #pragma warning(disable : 4514)
-class bytearray_ : public buffer {
+class __attribute__ ((visibility("hidden"))) bytearray_ : public buffer {
   public:
   PYBIND11_OBJECT_CVT(bytearray_, buffer, PyByteArray_Check, PyByteArray_FromObject)
 
