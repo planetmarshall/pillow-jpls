@@ -6,7 +6,7 @@ JPEG-LS plugin for Python Pillow
 
 A plugin for the Python [Pillow](https://pillow.readthedocs.io/en/stable/) imaging library for the
 JPEG-LS codec,
-based on the [Charls](https://github.com/team-charls/charls) JPEG-LS implemetation. 
+based on the [Charls](https://github.com/team-charls/charls) JPEG-LS implementation. 
 Python bindings implemented using [pybind11](https://pybind11.readthedocs.io/en/stable/).
 
 Available on the [Python Package Index](https://pypi.org/project/pillow-jpls/)
