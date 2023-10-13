@@ -8,7 +8,7 @@ def accept(header):
     magic_number = header[:4]
     spiff_header = b"\xff\xd8\xff\xe8"
     jpeg_header = b"\xff\xd8\xff\xf7"
-    return magic_number == spiff_header or magic_number == jpeg_header
+    return magic_number in (spiff_header, jpeg_header)
 
 
 def _mode(num_components, bits_per_component):
