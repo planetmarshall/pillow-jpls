@@ -54,7 +54,7 @@ class JplsImageFile(ImageFile):
         header = _pycharls.read_header(buffer)
         mode = _mode(header.component_count, header.bits_per_sample)
         if mode is None:
-            raise IOError(f"Mode not supported: components: {header.component_count}, bits: {header.bits_per_sample}")
+            raise OSError(f"Mode not supported: components: {header.component_count}, bits: {header.bits_per_sample}")
 
         meta = _metadata(header)
         color_space = meta.get("color_space")
