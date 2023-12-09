@@ -51,12 +51,14 @@ jobs:
         env:
           # Python 2.7 not supported
           # Python 3.5 Deprecated
-          # Pillow requires zlib to compile for PyPy on Windows
           # PyPy builds dont support conan
           # Pillow doesn't build on musilinux'
+          # Only use released wheels for Pillow
           # Pillow doesn't have wheels for 32-bit Python 3.12
           CIBW_SKIP: cp27-* cp35-* pp* *-musllinux* cp312-win32 cp312-manylinux_i686
+          CIBW_BEFORE_BUILD: "pip install Pillow --only-binary=:all:"
           CIBW_TEST_REQUIRES: pytest numpy
+          CIBW_BEFORE_TEST: "pip install Pillow --only-binary=:all:"
           CIBW_TEST_COMMAND: pytest -v {project}/test
           CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
           CIBW_BUILD_VERBOSITY: 1
