@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           lfs: true
 
@@ -68,7 +68,7 @@ jobs:
           MACOSX_DEPLOYMENT_TARGET: 10.15
 
       - name: Upload wheel files
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
             path: ./wheelhouse/*.whl
 
@@ -76,12 +76,12 @@ jobs:
     name: Make SDist
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Build SDist
         run: pipx run build --sdist
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           path: dist/*.tar.gz
 
@@ -92,7 +92,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: artifact
           path: dist
