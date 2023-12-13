@@ -24,7 +24,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-20.04, windows-2019, macos-11 ]
+        os: [ ubuntu-22.04, windows-2022, macos-12 ]
 
     steps:
       - name: Checkout repository
@@ -51,12 +51,11 @@ jobs:
         env:
           # Python 2.7 not supported
           # Python 3.5 Deprecated
-          # Python 3.6 Deprecated
           # PyPy builds dont support conan
           # Pillow doesn't build on musilinux'
           # Only use released wheels for Pillow
           # Pillow doesn't have wheels for 32-bit Python 3.12
-          CIBW_SKIP: cp27-* cp35-* cp36-* pp* *-musllinux* cp312-win32 cp312-manylinux_i686
+          CIBW_SKIP: cp27-* cp35-* pp* *-musllinux* cp312-win32 cp312-manylinux_i686
           CIBW_BEFORE_BUILD: "pip install Pillow --only-binary=:all:"
           CIBW_TEST_REQUIRES: pytest numpy
           CIBW_BEFORE_TEST: "pip install Pillow --only-binary=:all:"
