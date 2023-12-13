@@ -49,13 +49,11 @@ jobs:
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          # Python 2.7 not supported
-          # Python 3.5 Deprecated
           # PyPy builds dont support conan
           # Pillow doesn't build on musilinux'
           # Only use released wheels for Pillow
           # Pillow doesn't have wheels for 32-bit Python 3.12
-          CIBW_SKIP: cp27-* cp35-* pp* *-musllinux* cp312-win32 cp312-manylinux_i686
+          CIBW_SKIP: pp* *-musllinux* cp312-win32 cp312-manylinux_i686
           CIBW_BEFORE_BUILD: "pip install Pillow --only-binary=:all:"
           CIBW_TEST_REQUIRES: pytest numpy
           CIBW_BEFORE_TEST: "pip install Pillow --only-binary=:all:"
