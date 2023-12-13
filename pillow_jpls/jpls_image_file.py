@@ -71,5 +71,14 @@ class JplsImageFile(ImageFile):
 
         self.info.update(_metadata(header))
         self._size = (header.width, header.height)
-        self.mode = mode
+        self._mode = mode
         self.tile = [("jpeg_ls", (0, 0) + self.size, 0, (meta, ))]
+
+    @property
+    def mode(self) -> str:
+        return self._mode
+
+    @mode.setter
+    def mode(self, mode: str):
+        """Setter, for Pillow <10 compatibility."""
+        self._mode = mode
