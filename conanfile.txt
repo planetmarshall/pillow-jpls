@@ -1,12 +1,11 @@
-[requires]
-charls/2.3.4
-pybind11/2.10.0
-fmt/9.1.0
+requires]
+charls/2.4.2
+pybind11/2.11.1
+fmt/10.1.1
 eigen/3.4.0
 
 [generators]
-cmake
-cmake_find_package_multi
+CMakeDeps
 
 [options]
 charls:shared=False
