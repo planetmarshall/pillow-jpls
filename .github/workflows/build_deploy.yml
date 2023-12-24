@@ -57,7 +57,7 @@ jobs:
           CIBW_TEST_REQUIRES: pytest numpy
           CIBW_BEFORE_TEST: "pip install Pillow --only-binary=:all:"
           CIBW_TEST_COMMAND: pytest -v {project}/test
-          CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
+          CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_SKIP: "*-macosx_arm64"
 
