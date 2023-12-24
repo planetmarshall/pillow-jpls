@@ -1,4 +1,4 @@
-requires]
+[requires]
 charls/2.4.2
 pybind11/2.11.1
 fmt/10.1.1
@@ -8,4 +8,4 @@ eigen/3.4.0
 CMakeDeps
 
 [options]
-charls:shared=False
+charls/*:shared=False

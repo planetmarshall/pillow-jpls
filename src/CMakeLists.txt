@@ -17,8 +17,8 @@ endif()
 target_link_libraries( _pycharls
     PRIVATE
         pybind11::headers
-        charls::charls
-        Eigen3::Eigen3
+        charls
+        Eigen3::Eigen
         fmt::fmt
         )
 
