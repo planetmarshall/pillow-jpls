@@ -60,6 +60,8 @@ jobs:
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_SKIP: "*-macosx_arm64"
+          # Pybind std::variant support requires 10.14+
+          MACOSX_DEPLOYMENT_TARGET: 10.15
 
       - name: Upload wheel files
         uses: actions/upload-artifact@v3
@@ -68,7 +70,7 @@ jobs:
 
   make_sdist:
     name: Make SDist
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
@@ -83,7 +85,7 @@ jobs:
     name: Deploy to PyPi
     if: (github.event_name == 'release' && github.event.action == 'published') || github.event.inputs.upload
     needs: [build_wheels, make_sdist]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
