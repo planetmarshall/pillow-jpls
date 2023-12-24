@@ -46,6 +46,7 @@ setup(
     long_description=_long_description(),
     long_description_content_type="text/markdown",
     packages=find_packages(),
+    cmake_args=["--preset conan"],
     cmake_install_dir="pillow_jpls",
     install_requires=[
         "Pillow"

@@ -2,9 +2,9 @@
 requires = [
     "setuptools>=42",
     "wheel",
-    "pybind11~=2.6.0",
+    "pybind11~=2.11.1",
     "cmake",
-    "conan~=1.62.0",
+    "conan~=2.0.16",
     "ninja",
     "scikit-build",
 ]

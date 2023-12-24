@@ -50,14 +50,13 @@ example usage.
 Build
 -----
 
-The build is driven by [PEP 517](https://www.python.org/dev/peps/pep-0517/) 
-and [Scikit Build](https://scikit-build.readthedocs.io/en/latest/). 
+The build is driven by [Scikit Build](https://scikit-build.readthedocs.io/en/latest/). 
 [cibuildwheel](https://github.com/joerick/cibuildwheel) is used to generate packages using Github Actions, and
 C++ dependencies are satisfied by [conan](https://docs.conan.io/en/latest/).
 
 ```
-pip install pep517
-python -m pep517.build --binary .
+pip install build
+python -m build
 ```
 
 Tests
