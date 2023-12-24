@@ -35,7 +35,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: 3.12
 
       - name: Static Analysis
         run: |
@@ -43,11 +43,8 @@ jobs:
           pip install flake8
           flake8 --count --max-line-length=120 --statistics pillow_jpls
 
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.16.2
-
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
+        uses: pypa/cibuildwheel@v2.16.2
         env:
           # Python 2.7 not supported
           # Python 3.5 Deprecated
@@ -63,8 +60,6 @@ jobs:
           CIBW_ARCHS_MACOS: "x86_64 universal2 arm64"
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_SKIP: "*-macosx_arm64"
-          # Pybind std::variant support requires 10.14+
-          MACOSX_DEPLOYMENT_TARGET: 10.15
 
       - name: Upload wheel files
         uses: actions/upload-artifact@v3
