@@ -30,14 +30,14 @@ def _long_description():
 
 
 def _version():
-    git_sha = os.environ.get("PILLOW_JPLS_GIT_SHA")
+    commit_count = os.environ.get("PILLOW_JPLS_COMMIT_COUNT")
     with open(path.join(_current_directory(), 'CMakeLists.txt'), encoding='utf-8') as fp:
         text = fp.read()
         project_line = re.search(_project_regex, text, re.MULTILINE | re.IGNORECASE)
         semver = re.search(_semver_regex, project_line.group())
         semver_str = "{major}.{minor}.{patch}".format(**semver.groupdict())
-        if git_sha:
-            return f"{semver_str}-alpha+sha.{git_sha[:8]}"
+        if commit_count is not None and len(commit_count) > 0:
+            return f"{semver_str}.dev{commit_count}"
         return semver_str
 
 

@@ -38,6 +38,13 @@ jobs:
         with:
           lfs: true
 
+      - name: Get development revision
+        if: github.ref_type == 'branch'
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0)
+          COMMIT_COUNT=$(git rev-list ${LATEST_TAG}.. --count)
+          echo "PILLOW_JPLS_COMMIT_COUNT=${COMMIT_COUNT}" >> ${GITHUB_ENV}
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
@@ -47,7 +54,6 @@ jobs:
           # Pillow doesn't build on musilinux'
           # Only use released wheels for Pillow
           # Pillow doesn't have wheels for 32-bit Python 3.12
-          PILLOW_JPLS_GIT_SHA: "${{ github.ref_type == 'branch' && github.sha || '' }}"
           CIBW_BUILD_FRONTEND: "build"
           CIBW_SKIP: pp* *-musllinux* cp312-win32 cp312-manylinux_i686
           CIBW_BEFORE_BUILD: "pip install Pillow --only-binary=:all:"
@@ -57,7 +63,7 @@ jobs:
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_SKIP: "*-macosx_arm64"
-          CIBW_ENVIRONMENT_PASS_LINUX: PILLOW_JPLS_GIT_SHA
+          CIBW_ENVIRONMENT_PASS_LINUX: PILLOW_JPLS_COMMIT_COUNT
           # Pybind std::variant support requires 10.14+
           MACOSX_DEPLOYMENT_TARGET: 10.15
 
