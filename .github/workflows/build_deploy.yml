@@ -7,6 +7,10 @@ on:
 
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   static_analysis:
     runs-on: ubuntu-22.04
