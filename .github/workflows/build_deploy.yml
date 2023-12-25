@@ -83,9 +83,23 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: ${{ github.ref_type == 'tag' && '1' || '0' }}
+
+      - name: Get development revision
+        if: github.ref_type == 'branch'
+        run: |
+          LATEST_TAG=$(git tag --list --sort=creatordate | head -n 1)
+          if [[ -z "${LATEST_TAG}" ]]
+          then
+            echo "LATEST_TAG was empty"
+            exit 1
+          fi
+          COMMIT_COUNT=$(git rev-list ${LATEST_TAG}.. --count)
+          echo "PILLOW_JPLS_COMMIT_COUNT=${COMMIT_COUNT}" >> ${GITHUB_ENV}
 
       - name: Build SDist
-        run: pipx run build --sdist
+        run: python -m build --sdist
 
       - uses: actions/upload-artifact@v3
         with:
