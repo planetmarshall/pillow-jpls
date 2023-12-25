@@ -57,6 +57,7 @@ jobs:
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_SKIP: "*-macosx_arm64"
+          CIBW_ENVIRONMENT_PASS_LINUX: PILLOW_JPLS_GIT_SHA
           # Pybind std::variant support requires 10.14+
           MACOSX_DEPLOYMENT_TARGET: 10.15
 
