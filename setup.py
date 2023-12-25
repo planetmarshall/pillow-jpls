@@ -1,7 +1,9 @@
-import sys
+import os
 from os import path
-from setuptools import find_packages
 import re
+import sys
+
+from setuptools import find_packages
 
 
 _semver_regex = r"""(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)"""
@@ -28,11 +30,15 @@ def _long_description():
 
 
 def _version():
+    commit_count = os.environ.get("PILLOW_JPLS_COMMIT_COUNT")
     with open(path.join(_current_directory(), 'CMakeLists.txt'), encoding='utf-8') as fp:
         text = fp.read()
         project_line = re.search(_project_regex, text, re.MULTILINE | re.IGNORECASE)
         semver = re.search(_semver_regex, project_line.group())
-        return "{major}.{minor}.{patch}".format(**semver.groupdict())
+        semver_str = "{major}.{minor}.{patch}".format(**semver.groupdict())
+        if commit_count is not None and len(commit_count) > 0:
+            return f"{semver_str}.dev{commit_count}"
+        return semver_str
 
 
 setup(

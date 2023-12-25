@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(Pycharls VERSION 1.3.0)
+project(Pycharls VERSION 1.3.1)
 
 option(PYCHARLS_COMPILE_STRICT "Treat compiler warnings as errors" ON)
 find_package(Python COMPONENTS Interpreter Development)
