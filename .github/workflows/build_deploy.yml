@@ -14,10 +14,7 @@ on:
     - cron: '0 0 1 * *'
 
   workflow_dispatch:
-    inputs:
-      upload:
-        description: 'Upload to PyPi Test'
-        default: false
+
 jobs:
   static_analysis:
     runs-on: ubuntu-22.04
@@ -89,12 +86,17 @@ jobs:
 
   deploy_pypi:
     name: Deploy to PyPi
-    if: (github.event_name == 'release' && github.event.action == 'published') || github.event.inputs.upload
+    if: github.ref_type == 'tag'
     needs: 
       - static_analysis
       - build_wheels
       - make_sdist
     runs-on: ubuntu-22.04
+    environment:
+      name: pypi
+      url: https://pypi.org/p/pillow-jpls
+    permissions:
+      id-token: write
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v3
@@ -102,18 +104,30 @@ jobs:
           name: artifact
           path: dist
 
-      - name: Publish a Python distribution to PyPI
-        if: github.ref_name == 'main'
+      - name: Publish distribution to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
 
-      - name: Publish package to TestPyPI
-        if: github.ref_name != 'main'
+  deploy_test_pypi:
+    name: Deploy to TestPyPi
+    needs: 
+      - static_analysis
+      - build_wheels
+      - make_sdist
+    runs-on: ubuntu-22.04
+    environment:
+      name: testpypi
+      url: https://pypi.org/p/pillow-jpls
+    permissions:
+      id-token: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifact
+          path: dist
+
+      - name: Publish distribution to TestPyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-          repository_url: https://test.pypi.org/legacy/
+          repository-url: https://test.pypi.org/legacy
 
