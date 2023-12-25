@@ -30,12 +30,12 @@ jobs:
           flake8 --count --max-line-length=120 --statistics pillow_jpls
 
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+    name: Build wheels on ${{ matrix.os }} (${{ matrix.pyversion }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ ubuntu-22.04, windows-2022, macos-12 ]
-
+        pyversion: [ cp36, cp37, cp38, cp39, cp310, cp311, cp312]  
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -57,11 +57,12 @@ jobs:
           # Only use released wheels for Pillow
           # Pillow doesn't have wheels for 32-bit Python 3.12
           CIBW_BUILD_FRONTEND: "build"
+          CIBW_BUILD: "${{ matrix.pyversion }}-*"
           CIBW_SKIP: pp* *-musllinux* cp312-win32 cp312-manylinux_i686
           CIBW_BEFORE_BUILD: "pip install Pillow --only-binary=:all:"
-          CIBW_TEST_REQUIRES: pytest numpy
+          CIBW_TEST_REQUIRES: "pytest numpy"
           CIBW_BEFORE_TEST: "pip install Pillow --only-binary=:all:"
-          CIBW_TEST_COMMAND: pytest -v {project}/test
+          CIBW_TEST_COMMAND: "pytest -v {project}/test"
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_SKIP: "*-macosx_arm64"
