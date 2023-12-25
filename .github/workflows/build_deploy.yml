@@ -45,15 +45,7 @@ jobs:
 
       - name: Get development revision
         if: github.ref_type == 'branch'
-        run: |
-          LATEST_TAG=$(git tag --list --sort=creatordate | head -n 1)
-          if [[ -z "${LATEST_TAG}" ]]
-          then
-            echo "LATEST_TAG was empty"
-            exit 1
-          fi
-          COMMIT_COUNT=$(git rev-list ${LATEST_TAG}.. --count)
-          echo "PILLOW_JPLS_COMMIT_COUNT=${COMMIT_COUNT}" >> ${GITHUB_ENV}
+        run: echo "PILLOW_JPLS_COMMIT_COUNT=$(./scripts/latest_commits.sh)" >> ${GITHUB_ENV}
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
@@ -92,15 +84,7 @@ jobs:
 
       - name: Get development revision
         if: github.ref_type == 'branch'
-        run: |
-          LATEST_TAG=$(git tag --list --sort=creatordate | head -n 1)
-          if [[ -z "${LATEST_TAG}" ]]
-          then
-            echo "LATEST_TAG was empty"
-            exit 1
-          fi
-          COMMIT_COUNT=$(git rev-list ${LATEST_TAG}.. --count)
-          echo "PILLOW_JPLS_COMMIT_COUNT=${COMMIT_COUNT}" >> ${GITHUB_ENV}
+        run: echo "PILLOW_JPLS_COMMIT_COUNT=$(./scripts/latest_commits.sh)" >> ${GITHUB_ENV}
 
       - name: Set up Python
         uses: actions/setup-python@v4
