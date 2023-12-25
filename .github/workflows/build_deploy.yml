@@ -43,7 +43,7 @@ jobs:
         if: github.ref_type == 'branch'
         run: |
           LATEST_TAG=$(git tag --list --sort=creatordate | head -n 1)
-          if [[ -n "${LATEST_TAG}" ]]
+          if [[ -z "${LATEST_TAG}" ]]
           then
             echo "LATEST_TAG was empty"
             exit 1
