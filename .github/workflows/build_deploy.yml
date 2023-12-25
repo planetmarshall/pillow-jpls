@@ -21,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.12
+          python-version: "3.x"
 
       - name: Static Analysis
         run: |
@@ -101,6 +101,14 @@ jobs:
           fi
           COMMIT_COUNT=$(git rev-list ${LATEST_TAG}.. --count)
           echo "PILLOW_JPLS_COMMIT_COUNT=${COMMIT_COUNT}" >> ${GITHUB_ENV}
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install build
+        run: pip install build
 
       - name: Build SDist
         run: python -m build --sdist
