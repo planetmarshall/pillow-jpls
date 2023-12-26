@@ -9,6 +9,8 @@ _skbuild
 *.egg-info
 **/__pycache__
 .ipynb_checkpoints
+MANIFEST.in
+dist
 
 
 # Binaries
