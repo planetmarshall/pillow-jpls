@@ -14,7 +14,7 @@ readme="README.md"
 authors=[{ "name" = "Andrew Marshall", "email" = "andrew@algodynamic.com"}]
 urls={"github" = "https://github.com/planetmarshall/pillow-jpls"}
 license={"text" = "BSD-3-Clause"}
-requires-python=">=3.6"
+requires-python=">=3.7"
 dependencies=[
   "Pillow"
 ]
