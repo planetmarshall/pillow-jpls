@@ -23,5 +23,5 @@ target_link_libraries( _pycharls
         )
 
 install(TARGETS _pycharls
-        LIBRARY DESTINATION .
+        LIBRARY DESTINATION pillow_jpls
         )
