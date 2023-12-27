@@ -35,7 +35,16 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-22.04, windows-2022, macos-12 ]
-        pyversion: [ cp37, cp38, cp39, cp310, cp311, cp312]
+        pyversion: [ cp37, cp38, cp39, cp310, cp311, cp312 ]
+        archs: [auto64, auto32]
+        exclude:
+          - os: macos-12
+            archs: auto64
+          - os: macos-12
+            archs: auto32
+        include:
+          - os: macos-12
+            archs: "x86_64 arm64"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -46,11 +55,14 @@ jobs:
       - name: Setup MSVC tools
         if: matrix.os == 'windows-2022'
         uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.archs == 'auto64' && 'amd64' || 'amd64_x86' }}
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: "${{ matrix.pyversion }}-*"
+          CIBW_ARCH: "${{ matrix.archs }}"
           # Pybind std::variant support requires 10.14+
           MACOSX_DEPLOYMENT_TARGET: 10.15
 
