@@ -52,9 +52,7 @@ jobs:
         run: pip install build pytest
 
       - name: Build project
-        run: |
-          mkdir build
-          python -m build -C build-dir="$PWD/build"
+        run: python -m build -C cmake.args="--preset conan" -C cmake.args="--debug-output"
 
       - name: run tests
         run: pytest test/
@@ -62,11 +60,12 @@ jobs:
       - name: dump cmake logs
         if: always()
         run: |
-          CMAKE_OUTPUT=$(find build -name CMakeOutput.log)
-          CMAKE_ERROR=$(find build -name CMakeError.log)
+          CMAKE_OUTPUT=$(find $HOME -name CMakeOutput.log)
+          CMAKE_ERROR=$(find $HOME -name CMakeError.log)
           echo ${CMAKE_OUTPUT}
           echo ${CMAKE_ERROR}
           cat ${CMAKE_OUTPUT} ${CMAKE_ERROR}
+
 
   make_sdist:
     name: Make SDist
