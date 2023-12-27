@@ -50,7 +50,7 @@ example usage.
 Build
 -----
 
-The build is driven by [Scikit Build](https://scikit-build.readthedocs.io/en/latest/). 
+The build is driven by [Scikit Build Core](https://github.com/scikit-build/scikit-build-core).
 [cibuildwheel](https://github.com/joerick/cibuildwheel) is used to generate packages using Github Actions, and
 C++ dependencies are satisfied by [conan](https://docs.conan.io/en/latest/).
 
@@ -66,7 +66,7 @@ A suite of tests covering the applicable conformance tests from the specificatio
 You will need [git-lfs](https://git-lfs.github.com/) to clone the data.
 
 ```
-pip install pytest .
+pip install -r requirements.txt
 pytest -v test
 ```
 

@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.24)
 
-project(Pycharls VERSION 1.3.1)
+project(Pycharls VERSION 1.3.0)
 
-option(PYCHARLS_COMPILE_STRICT "Treat compiler warnings as errors" ON)
-find_package(Python COMPONENTS Interpreter Development)
+find_package(Python COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(charls CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
@@ -11,16 +10,10 @@ find_package(Eigen3 CONFIG REQUIRED)
 
 if (MSVC)
     add_compile_options(/Wall /permissive-)
-    if (PYCHARLS_COMPILE_STRICT)
-        add_compile_options(/WX)
-    endif()
 else()
     add_compile_options(-Wall -Wextra -Wpedantic -Wno-unknown-pragmas)
     if (CMAKE_CXX_COMPILER_ID MATCHES Clang$)
         add_compile_options(-Wconversion -Wconditional-uninitialized)
-    endif()
-    if (PYCHARLS_COMPILE_STRICT)
-        add_compile_options(-Werror)
     endif()
 endif()
 
