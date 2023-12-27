@@ -28,3 +28,16 @@ cmake.args=["--preset conan"]
 
 [tool.setuptools_scm]
 local_scheme = "no-local-version"
+
+[tool.cibuildwheel]
+build-frontend = "build"
+skip = "pp* *-musllinux* cp312-win32 cp312-manylinux_i686"
+before-build = "pip install Pillow --only-binary=:all:"
+test-requires = "pytest numpy"
+before-test = "pip install Pillow --only-binary=:all:"
+test-command = "pytest -v {project}/test"
+build-verbosity = 1
+test-skip = "*-macosx_arm64"
+
+[tool.cibuildwheel.macos]
+archs = "x86_64 arm64"

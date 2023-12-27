@@ -12,10 +12,6 @@
 #include <vector>
 #include <variant>
 
-#ifdef GCC
-
-#endif
-
 
 namespace py = pybind11;
 using namespace py::literals;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.24)
 
 project(Pycharls VERSION 1.3.0)
 
-find_package(Python COMPONENTS Interpreter Development)
+find_package(Python COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)
 find_package(charls CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
