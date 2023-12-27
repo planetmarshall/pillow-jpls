@@ -61,7 +61,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.16.2
         env:
           CIBW_BUILD: "${{ matrix.pyversion }}-*"
-          CIBW_ARCH: "${{ matrix.arch }}"
+          CIBW_ARCHS: "${{ matrix.arch }}"
           # Pybind std::variant support requires 10.14+
           MACOSX_DEPLOYMENT_TARGET: 10.15
 
