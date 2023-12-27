@@ -43,6 +43,10 @@ jobs:
           lfs: true
           fetch-depth: ${{ github.ref_type == 'tag' && '1' || '0' }}
 
+      - name: Setup MSVC tools
+        if: matrix.os == 'windows-2022'
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
         env:
