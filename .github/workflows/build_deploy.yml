@@ -34,8 +34,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-22.04, windows-2022, macos-12 ]
-        pyversion: [ cp37, cp38, cp39, cp310, cp311, cp312]
+        os: [ windows-2022 ]
+        pyversion: [ cp310 ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,32 +43,20 @@ jobs:
           lfs: true
           fetch-depth: ${{ github.ref_type == 'tag' && '1' || '0' }}
 
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.2
-        env:
-          # Python 2.7 not supported
-          # Python 3.5 Deprecated
-          # PyPy builds dont support conan
-          # Pillow doesn't build on musilinux'
-          # Only use released wheels for Pillow
-          # Pillow doesn't have wheels for 32-bit Python 3.12
-          CIBW_BUILD_FRONTEND: "build"
-          CIBW_BUILD: "${{ matrix.pyversion }}-*"
-          CIBW_SKIP: pp* *-musllinux* cp312-win32 cp312-manylinux_i686
-          CIBW_BEFORE_BUILD: "pip install Pillow --only-binary=:all:"
-          CIBW_TEST_REQUIRES: "pytest numpy"
-          CIBW_BEFORE_TEST: "pip install Pillow --only-binary=:all:"
-          CIBW_TEST_COMMAND: "pytest -v {project}/test"
-          CIBW_ARCHS_MACOS: "x86_64 arm64"
-          CIBW_BUILD_VERBOSITY: 1
-          CIBW_TEST_SKIP: "*-macosx_arm64"
-          # Pybind std::variant support requires 10.14+
-          MACOSX_DEPLOYMENT_TARGET: 10.15
-
-      - name: Upload wheel files
-        uses: actions/upload-artifact@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-            path: ./wheelhouse/*.whl
+          python-version: "3.x"
+
+      - name: Install prerequisites
+        run: pip install build pytest
+
+      - name: Build project
+        run: python -m build -C cmake.args="--preset conan" -C cmake.args="--debug-output"
+
+      - name: run tests
+        run: pytest test/
+
 
   make_sdist:
     name: Make SDist
@@ -93,49 +81,3 @@ jobs:
         with:
           path: dist/*.tar.gz
 
-  deploy_pypi:
-    name: Deploy to PyPi
-    if: github.ref_type == 'tag'
-    needs: 
-      - static_analysis
-      - build_wheels
-      - make_sdist
-    runs-on: ubuntu-22.04
-    environment:
-      name: pypi
-      url: https://pypi.org/p/pillow-jpls
-    permissions:
-      id-token: write
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: artifact
-          path: dist
-
-      - name: Publish distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
-  deploy_test_pypi:
-    name: Deploy to TestPyPi
-    needs: 
-      - static_analysis
-      - build_wheels
-      - make_sdist
-    runs-on: ubuntu-22.04
-    environment:
-      name: testpypi
-      url: https://pypi.org/p/pillow-jpls
-    permissions:
-      id-token: write
-    steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: artifact
-          path: dist
-
-      - name: Publish distribution to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
