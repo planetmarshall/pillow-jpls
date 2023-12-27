@@ -44,6 +44,8 @@ jobs:
             arch: arm64
           - os: ubuntu-22.04
             arch: arm64
+          - pyversion: cp312
+            arch: auto32
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
