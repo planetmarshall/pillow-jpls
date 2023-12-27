@@ -62,11 +62,7 @@ jobs:
       - name: dump cmake logs
         if: always()
         run: |
-          CMAKE_OUTPUT=$(find build -name CMakeOutput.log)
-          CMAKE_ERROR=$(find build -name CMakeError.log)
-          echo ${CMAKE_OUTPUT}
-          echo ${CMAKE_ERROR}
-          cat ${CMAKE_OUTPUT} ${CMAKE_ERROR}
+          ls -R build
 
   make_sdist:
     name: Make SDist
