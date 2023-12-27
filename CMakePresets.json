@@ -9,6 +9,7 @@
     {
       "name": "conan",
       "description": "Provide dependencies using the conan package manager",
+      "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "${sourceDir}/cmake/conan_provider.cmake",
 	"CMAKE_BUILD_TYPE": "Release",
