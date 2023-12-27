@@ -12,7 +12,8 @@
       "generator": "Ninja",
       "cacheVariables": {
         "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "${sourceDir}/cmake/conan_provider.cmake",
-	"CMAKE_BUILD_TYPE": "Release"
+	"CMAKE_BUILD_TYPE": "Release",
+	"CMAKE_COMPILE_WARNING_AS_ERROR": "ON"
       }
     }
   ]
