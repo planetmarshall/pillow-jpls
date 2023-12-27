@@ -51,11 +51,6 @@ jobs:
       - name: Install prerequisites
         run: pip install build pytest
 
-      - name: Test Ninja
-        run: |
-          ninja --help
-          which ninja
-
       - name: Build project
         run: |
           mkdir build
