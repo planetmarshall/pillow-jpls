@@ -1,4 +1,4 @@
-Python_add_library(_pycharls pycharls.cpp)
+Python_add_library(_pycharls MODULE pycharls.cpp WITH_SOABI)
 
 set_target_properties(_pycharls PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION ON
@@ -6,6 +6,7 @@ set_target_properties(_pycharls PROPERTIES
         VISIBILITY_INLINES_HIDDEN ON)
 
 target_compile_features(_pycharls PRIVATE cxx_std_17)
+target_compile_definitions(_pycharls PRIVATE VERSION_INFO=${PROJECT_VERSION})
 
 if (MSVC)
     #various warnings introuced by external code
