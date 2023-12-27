@@ -53,7 +53,7 @@ jobs:
 
       - name: Build project
         run: |
-          python -m build -C cmake.args="-G Ninja"
+          python -m build
 
       - name: run tests
         run: pytest test/
