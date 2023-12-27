@@ -51,13 +51,23 @@ jobs:
       - name: Install prerequisites
         run: pip install build pytest
 
+      - name: Test Ninja
+        run: |
+          ninja --help
+          which ninja
+
       - name: Build project
         run: |
-          python -m build
+          mkdir build
+          python -m build -C build-dir="$PWD/build"
 
       - name: run tests
         run: pytest test/
 
+      - name: dump cmake logs
+        if: always()
+        run: |
+          ls -R build
 
   make_sdist:
     name: Make SDist
