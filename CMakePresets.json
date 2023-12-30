@@ -7,14 +7,26 @@
   },
   "configurePresets": [
     {
-      "name": "conan",
-      "description": "Provide dependencies using the conan package manager",
+      "name": "default",
+      "hidden": true,
       "generator": "Ninja",
       "cacheVariables": {
-        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "${sourceDir}/cmake/conan_provider.cmake",
-	"CMAKE_BUILD_TYPE": "Release",
-	"CMAKE_COMPILE_WARNING_AS_ERROR": "ON"
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_COMPILE_WARNING_AS_ERROR": "ON"
       }
+    },
+    {
+      "name": "conan",
+      "description": "Provide dependencies using the conan package manager",
+      "inherits": ["default"],
+      "cacheVariables": {
+        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "${sourceDir}/cmake/conan_provider.cmake"
+      }
+    },
+    {
+      "name": "sysdeps",
+      "description": "Assume dependencies are present on the system. Don't use Conan",
+      "inherits": ["default"]
     }
   ]
 }
