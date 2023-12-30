@@ -65,11 +65,11 @@ To use system dependencies instead of using conan:
 
 ```
 python -m build -C cmake.args="--preset sysdeps"
-pip install dist/<wheel_name>.whl
+pip install dist/*.whl
 ```
 
 Note that wheels created this way are unlikely to be portable and are suitable only for local use. A Dockerfile is provided
-in the root repository to install the prerequisites, see also the CI job that builds a wheel using only system
+in the root of the repository to install the prerequisites, see also the CI job that builds a wheel using only system
 dependencies.
 
 Tests
