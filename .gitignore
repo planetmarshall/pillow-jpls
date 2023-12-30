@@ -1,7 +1,6 @@
 # Common build folder locations
 build
-cmake-build-debug
-cmake-build-release
+cmake-build-*
 
 # Python
 _skbuild

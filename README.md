@@ -59,6 +59,18 @@ pip install build
 python -m build
 ```
 
+### Build without conan
+
+To use system dependencies instead of using conan:
+
+```
+python -m build -C cmake.args="--preset sysdeps"
+pip install dist/<wheel_name>.whl
+```
+
+Note that wheels created this way will not be portable and are suitable only for local use. A Dockerfile is provided
+in the root repository to install the prerequisites.
+
 Tests
 -----
 

@@ -72,6 +72,42 @@ jobs:
         with:
             path: ./wheelhouse/*.whl
 
+  build_wheel_sysdeps:
+    name: Build wheel using system dependencies
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          fetch-depth: ${{ github.ref_type == 'tag' && '1' || '0' }}
+
+      - name: install prerequisites
+        run: |
+          apt-get install \
+            libcharls-dev \
+            libfmt-dev \
+            libeigen3-dev \
+            pybind11-dev
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: install python requirements
+        run: |
+          pip install -r requirements.txt build
+
+      - name: build and install wheel
+        run: |
+          python -m build -C cmake.args="--preset sysdeps"
+          pip install dist/*.whl
+
+      - name: test the wheel
+        run: |
+          pytest -v test/
+
   make_sdist:
     name: Make SDist
     runs-on: ubuntu-22.04
