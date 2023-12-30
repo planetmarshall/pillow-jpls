@@ -52,7 +52,7 @@ Build
 
 The build is driven by [Scikit Build Core](https://github.com/scikit-build/scikit-build-core).
 [cibuildwheel](https://github.com/joerick/cibuildwheel) is used to generate packages using Github Actions, and
-C++ dependencies are satisfied by [conan](https://docs.conan.io/en/latest/).
+C++ dependencies are satisfied by [conan](https://docs.conan.io/en/latest/) using [cmake-conan](https://github.com/conan-io/cmake-conan).
 
 ```
 pip install build
