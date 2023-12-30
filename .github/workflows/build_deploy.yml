@@ -36,12 +36,16 @@ jobs:
       matrix:
         os: [ ubuntu-22.04, windows-2022, macos-12 ]
         pyversion: [ cp38, cp39, cp310, cp311, cp312 ]
-        arch: [ auto32, auto64, arm64 ]
+        arch: [ auto32, auto64, aarch64, arm64 ]
         exclude:
           - os: macos-12
             arch: auto32
+          - os: macos-12
+            arch: aarch64
           - os: windows-2022
             arch: arm64
+          - os: windows-2022
+            arch: aarch64
           - os: ubuntu-22.04
             arch: arm64
           - pyversion: cp312
@@ -58,6 +62,12 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch == 'auto64' && 'amd64' || 'amd64_x86' }}
+
+      - name: Install QEMU for Arm builds
+        if: matrix.arch == 'aarch64'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
