@@ -64,8 +64,10 @@ jobs:
         env:
           CIBW_BUILD: "${{ matrix.pyversion }}-*"
           CIBW_ARCHS: "${{ matrix.arch }}"
+          CIBW_ENVIRONMENT_PASS_LINUX: SETUPTOOLS_SCM_OVERRIDES_FOR_PILLOW_JPLS
           # Pybind std::variant support requires 10.14+
           MACOSX_DEPLOYMENT_TARGET: 10.15
+          SETUPTOOLS_SCM_OVERRIDES_FOR_PILLOW_JPLS: 'local_scheme = "no-local-version"'
 
       - name: Upload wheel files
         uses: actions/upload-artifact@v3

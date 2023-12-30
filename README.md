@@ -68,8 +68,9 @@ python -m build -C cmake.args="--preset sysdeps"
 pip install dist/<wheel_name>.whl
 ```
 
-Note that wheels created this way will not be portable and are suitable only for local use. A Dockerfile is provided
-in the root repository to install the prerequisites.
+Note that wheels created this way are unlikely to be portable and are suitable only for local use. A Dockerfile is provided
+in the root repository to install the prerequisites, see also the CI job that builds a wheel using only system
+dependencies.
 
 Tests
 -----

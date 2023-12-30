@@ -27,7 +27,6 @@ cmake.minimum-version = "3.24"
 cmake.args=["--preset conan"]
 
 [tool.setuptools_scm]
-local_scheme = "no-local-version"
 
 [tool.cibuildwheel]
 build-frontend = "build"
