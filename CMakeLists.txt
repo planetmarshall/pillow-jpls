@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 cmake_policy(SET CMP0148 NEW)
 
-project(Pycharls VERSION 1.3.1)
+project(Pycharls VERSION 1.3.2)
 
 find_package(Python COMPONENTS Interpreter Development.Module)
 find_package(pybind11 CONFIG REQUIRED)

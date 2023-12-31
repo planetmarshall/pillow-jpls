@@ -76,7 +76,6 @@ Tests
 -----
 
 A suite of tests covering the applicable conformance tests from the specification is provided.
-You will need [git-lfs](https://git-lfs.github.com/) to clone the data.
 
 ```
 pip install -r requirements.txt
