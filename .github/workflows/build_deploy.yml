@@ -54,6 +54,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          fetch-tags: true
           filter: tree:0
 
       - name: Setup MSVC tools
@@ -90,6 +91,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          fetch-tags: true
           filter: tree:0
 
       - name: install prerequisites
@@ -124,6 +126,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          fetch-tags: true
           filter: tree:0
 
       - name: Set up Python
